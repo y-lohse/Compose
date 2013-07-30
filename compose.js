@@ -2,8 +2,9 @@
 	'use strict';
 	
 	var Compose = function(element){
+		this.selecting = false;
 		this.$element = $(element).attr('contentEditable', true)
-								  .on('mouseup', $.proxy(this.selection, this))
+								  .on('mousedown', $.proxy(this.selectionStart, this))
 								  .on('keyup', $.proxy(this.keyup, this));
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
@@ -16,8 +17,15 @@
 		$('body').append(this.$toolbar);
 		
 		$(document).on('mouseup', $.proxy(function(event){
-			console.log(event.target);
-			if (!$.contains(this.$element[0], event.target)) this.$toolbar.hide();
+			if (!this.selecting && 
+				!$.contains(this.$element[0], event.target) && 
+				!$.contains(this.$toolbar[0], event.target)){
+				this.$toolbar.hide();
+			}
+			else{
+				this.selection(event);
+			}
+			this.selecting= false;
 		}, this));
 	};
 	
@@ -26,9 +34,16 @@
 		return this;
 	};
 	
+	Compose.prototype.selectionStart = function(event){
+		this.selecting = true;
+	};
+	
 	Compose.prototype.selection = function(event){
 		var selection = rangy.getSelection();
-		if (selection.isCollapsed) return;
+		if (selection.isCollapsed){
+			this.$toolbar.hide();
+			return;
+		}
 		
 		var $positionElem = $('<span>');
 		selection.getAllRanges()[0].insertNode($positionElem[0]);
