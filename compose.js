@@ -2,6 +2,8 @@
 	'use strict';
 	
 	var Compose = function(element){
+		this.selection = null;
+		
 		this.selecting = false;
 		this.$element = $(element).attr('contentEditable', true)
 								  .on('mousedown', $.proxy(this.selectionStart, this))
@@ -23,9 +25,9 @@
 				this.$toolbar.hide();
 			}
 			else{
-				this.selection(event);
+				this.selectionEnd(event);
 			}
-			this.selecting= false;
+			this.selecting = false;
 		}, this));
 	};
 	
@@ -38,15 +40,17 @@
 		this.selecting = true;
 	};
 	
-	Compose.prototype.selection = function(event){
+	Compose.prototype.selectionEnd = function(event){
 		var selection = rangy.getSelection();
 		if (selection.isCollapsed){
 			this.$toolbar.hide();
 			return;
 		}
 		
-		var $positionElem = $('<span>');
-		selection.getAllRanges()[0].insertNode($positionElem[0]);
+		var $positionElem = $('<span>'),
+			range = selection.getRangeAt(0),
+			clone = range.cloneRange();
+		(range.nativeRange.insertNode) ? range.nativeRange.insertNode($positionElem[0]) : range.insertNode($positionElem[0]);
 		var position = $positionElem.offset();
 		//@TODO : check for colision with browser boundaries
 		this.$toolbar.css({
@@ -54,8 +58,15 @@
 			left: position.left,
 		});
 		$positionElem.remove();
-		
+		selection.removeAllRanges();
+		selection.addRange(clone);
 		this.$toolbar.show();
+	};
+	
+	Compose.prototype.wrapSelection = function(elem){
+		elem = $(elem).text(this.selection.toString());
+		
+		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
 	};
 	
 	Compose.prototype.keyup = function(event){
@@ -65,6 +76,9 @@
 		var compose = new Compose('#composearea');
 		var bold = $('<button>')
 					.html('b');
+		bold.click(function(event){
+			compose.wrapSelection('<strong>');
+		});
 		compose.addTool(bold);
 	});
 })(window.jQuery);
