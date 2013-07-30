@@ -70,6 +70,7 @@
 	};
 	
 	Compose.prototype.keyup = function(event){
+		var carretOffset = rangy.getSelection().getRangeAt(0).startOffset;
 	};
 	
 	$(function(){
