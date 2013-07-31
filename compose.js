@@ -31,6 +31,10 @@
 		}, this));
 	};
 	
+	Compose.REGEX = {
+		'title': /^#+ .*/
+	};
+	
 	Compose.prototype.addTool = function(tool){
 		this.$toolbar.append(tool);
 		return this;
@@ -63,14 +67,31 @@
 		this.$toolbar.show();
 	};
 	
-	Compose.prototype.wrapSelection = function(elem){
-		elem = $(elem).text(this.selection.toString());
+	Compose.prototype.wrapRange = function(elem, range){
+		range = range || rangy.getSelection().getRangeAt(0);
+		elem = $(elem).text(range.toString());
 		
 		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
 	};
 	
 	Compose.prototype.keyup = function(event){
-		var carretOffset = rangy.getSelection().getRangeAt(0).startOffset;
+		var selection = rangy.getSelection(),
+			subject = selection.anchorNode.wholeText || '';
+		
+		var title = subject.match(Compose.REGEX.title) || [];
+		if (title[0]){
+			var range = rangy.createRange(),
+				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6),
+				$node = $('<h'+titleLevel+'>');
+				
+			range.setStart(selection.anchorNode, subject.lastIndexOf('# ')+2);
+			range.setEnd(selection.anchorNode, subject.length);
+			this.wrapRange($node, range);
+			var $previous = $(range.startContainer.parentNode);
+			range.setStart(selection.anchorNode, 0);
+			range.deleteContents();
+			if ($previous.text() === '') $previous.remove();
+		}
 	};
 	
 	$(function(){
@@ -78,7 +99,7 @@
 		var bold = $('<button>')
 					.html('b');
 		bold.click(function(event){
-			compose.wrapSelection('<strong>');
+			compose.wrapRange('<strong>');
 		});
 		compose.addTool(bold);
 	});
