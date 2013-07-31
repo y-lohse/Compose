@@ -33,7 +33,8 @@
 	
 	Compose.REGEX = {
 		'title': /^#+ .+/,
-		'ul': /^(\*|\-|\+){1} .+/
+		'ul': /^(\*|\-|\+){1} .+/,
+		'ol': /^1\. .+/
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -111,6 +112,27 @@
 			//remove wrapping p element and reposition carret
 			selection.refresh(true);
 			var $list = $(selection.anchorNode).closest('ul');
+			if ($list.parent().children().length === 1) $list.unwrap();
+			selection.collapse(selection.anchorNode, 1);
+		}
+		
+		var ol = subject.match(Compose.REGEX.ol) || [];
+		if (ol[0]){
+			var range = rangy.createRange();
+			range.setStartAfter(selection.anchorNode.parentNode);
+			range.setEndAfter(selection.anchorNode.parentNode);
+			document.execCommand('insertOrderedList');
+			
+			//reinsert content without list marker
+			selection.refresh();
+			range.setStartBefore(selection.anchorNode);
+			range.setEndAfter(selection.anchorNode);
+			range.deleteContents();
+			range.insertNode(document.createTextNode(subject.replace(/^1\. /, '')));
+			
+			//remove wrapping p element and reposition carret
+			selection.refresh(true);
+			var $list = $(selection.anchorNode).closest('ol');
 			if ($list.parent().children().length === 1) $list.unwrap();
 			selection.collapse(selection.anchorNode, 1);
 		}
