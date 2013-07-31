@@ -32,7 +32,8 @@
 	};
 	
 	Compose.REGEX = {
-		'title': /^#+ .*/
+		'title': /^#+ .+/,
+		'ul': /^(\*|\-|\+){1} .+/
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -57,6 +58,7 @@
 		(range.nativeRange.insertNode) ? range.nativeRange.insertNode($positionElem[0]) : range.insertNode($positionElem[0]);
 		var position = $positionElem.offset();
 		//@TODO : check for colision with browser boundaries
+		//@TODO: remove fixed value
 		this.$toolbar.css({
 			top: position.top-20,
 			left: position.left,
@@ -81,16 +83,36 @@
 		var title = subject.match(Compose.REGEX.title) || [];
 		if (title[0]){
 			var range = rangy.createRange(),
-				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6),
-				$node = $('<h'+titleLevel+'>');
+				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6);
 				
 			range.setStart(selection.anchorNode, subject.lastIndexOf('# ')+2);
 			range.setEnd(selection.anchorNode, subject.length);
-			this.wrapRange($node, range);
+			this.wrapRange($('<h'+titleLevel+'>'), range);
 			var $previous = $(range.startContainer.parentNode);
 			range.setStart(selection.anchorNode, 0);
 			range.deleteContents();
 			if ($previous.text() === '') $previous.remove();
+		}
+		
+		var ul = subject.match(Compose.REGEX.ul) || [];
+		if (ul[0]){
+			var range = rangy.createRange();
+			range.setStartAfter(selection.anchorNode.parentNode);
+			range.setEndAfter(selection.anchorNode.parentNode);
+			document.execCommand('insertUnorderedList');
+			
+			//reinsert content without list marker
+			selection.refresh();
+			range.setStartBefore(selection.anchorNode);
+			range.setEndAfter(selection.anchorNode);
+			range.deleteContents();
+			range.insertNode(document.createTextNode(subject.replace(/^(\*|\-|\+) /, '')));
+			
+			//remove wrapping p element and reposition carret
+			selection.refresh(true);
+			var $list = $(selection.anchorNode).closest('ul');
+			if ($list.parent().children().length === 1) $list.unwrap();
+			selection.collapse(selection.anchorNode, 1);
 		}
 	};
 	
