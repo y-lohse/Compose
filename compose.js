@@ -36,7 +36,8 @@
 		'ul': /^(\*|\-|\+){1} [^*-]+/,
 		'ol': /^1\. .+/,
 		'hr': /((\*|\-|_){1} ?){3,}/,
-		'quote': /^> .+/
+		'quote': /^> .+/,
+		'emphasis': /\*{1}.+\*{1}/
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -157,7 +158,6 @@
 		var quote = subject.match(Compose.REGEX.quote) || [];
 		if (quote[0]){
 			var range = rangy.createRange();
-				
 			range.setStart(selection.anchorNode, subject.lastIndexOf('> ')+2);
 			range.setEnd(selection.anchorNode, subject.length);
 			this.wrapRange($('<blockquote>'), range);
@@ -165,6 +165,23 @@
 			range.setStart(selection.anchorNode, 0);
 			range.deleteContents();
 			if ($previous.text() === '') $previous.remove();
+		}
+		
+		var emphasis = subject.match(Compose.REGEX.emphasis) || [];
+		if (emphasis.length){
+			var range = rangy.createRange();
+			for (var i = 0, l = emphasis.length; i < l; i++){
+				range.setStart(selection.anchorNode, subject.indexOf(emphasis[i])+1);
+				range.setEnd(selection.anchorNode, emphasis[i].length-1);
+				this.wrapRange($('<em>'), range);
+				range.setStart(selection.anchorNode, subject.indexOf(emphasis[i]));
+				range.setEnd(selection.anchorNode, emphasis[i].length);
+				range.deleteContents();
+				selection.refresh(true);
+//				range.setStartAfter(selection.anchorNode.parentNode);
+//				range.setEndAfter(selection.anchorNode.parentNode);
+//				selection.collapseToEnd();
+			} 
 		}
 	};
 	
