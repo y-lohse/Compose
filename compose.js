@@ -35,7 +35,8 @@
 		'title': /^#+ .+/,
 		'ul': /^(\*|\-|\+){1} [^*-]+/,
 		'ol': /^1\. .+/,
-		'hr': /((\*|\-|_){1} ?){3,}/
+		'hr': /((\*|\-|_){1} ?){3,}/,
+		'quote': /^> .+/
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -149,6 +150,19 @@
 			$previous = $(selection.anchorNode.parentNode);
 			range.setStartBefore(selection.anchorNode);
 			range.setEndAfter(selection.anchorNode);
+			range.deleteContents();
+			if ($previous.text() === '') $previous.remove();
+		}
+		
+		var quote = subject.match(Compose.REGEX.quote) || [];
+		if (quote[0]){
+			var range = rangy.createRange();
+				
+			range.setStart(selection.anchorNode, subject.lastIndexOf('> ')+2);
+			range.setEnd(selection.anchorNode, subject.length);
+			this.wrapRange($('<blockquote>'), range);
+			var $previous = $(range.startContainer.parentNode);
+			range.setStart(selection.anchorNode, 0);
 			range.deleteContents();
 			if ($previous.text() === '') $previous.remove();
 		}
