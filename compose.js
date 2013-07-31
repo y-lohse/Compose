@@ -33,8 +33,9 @@
 	
 	Compose.REGEX = {
 		'title': /^#+ .+/,
-		'ul': /^(\*|\-|\+){1} .+/,
-		'ol': /^1\. .+/
+		'ul': /^(\*|\-|\+){1} [^*-]+/,
+		'ol': /^1\. .+/,
+		'hr': /((\*|\-|_){1} ?){3,}/
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -135,6 +136,21 @@
 			var $list = $(selection.anchorNode).closest('ol');
 			if ($list.parent().children().length === 1) $list.unwrap();
 			selection.collapse(selection.anchorNode, 1);
+		}
+		
+		var hr = subject.match(Compose.REGEX.hr) || [];
+		if (hr[0]){
+			var range = rangy.createRange();
+			range.setStartAfter(selection.anchorNode.parentNode);
+			range.setEndAfter(selection.anchorNode.parentNode);
+			document.execCommand('insertHTML', false, '<hr />');
+			document.execCommand('insertHTML', false, '<p></p>');
+			
+			$previous = $(selection.anchorNode.parentNode);
+			range.setStartBefore(selection.anchorNode);
+			range.setEndAfter(selection.anchorNode);
+			range.deleteContents();
+			if ($previous.text() === '') $previous.remove();
 		}
 	};
 	
