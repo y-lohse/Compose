@@ -32,6 +32,7 @@
 	};
 	
 	Compose.MarkDown = {
+		//simple block level tags
 		'title': {
 			expression: /^#+ .+/g,
 			insert: function(match, range, selection){
@@ -41,10 +42,24 @@
 			cleanup: function($insertedElement){
 				//remove #'s
 				$insertedElement.html($insertedElement.text().replace(/^#+ /, ''));
+				//titles usually spring out of p tags, but the p isn't removed even if it's empty
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: 'end'
 		},
+		'quote': {
+			expression: /^> .+/g,
+			insert: function(match, range, selection){
+				this.wrapRange($('<blockquote>'), range);
+			},
+			cleanup: function($insertedElement){
+				//essentially same as title
+				$insertedElement.html($insertedElement.text().replace(/^> /, ''));
+				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
+			},
+			carret: 'end'
+		},
+		//complex block level tags
 		'ul': {
 			expression: /^(\*|\-|\+){1} [^*-]+/g,
 			insert: function(match, range, selection){
@@ -76,7 +91,6 @@
 			carret: 'end'
 		},
 //		'hr': /((\*|\-|_){1} ?){3,}/,
-//		'quote': /^> .+/,
 //		'em': /\*{1}.+\*{1}./,
 	};
 	
@@ -161,27 +175,6 @@
 		}
 		
 //		
-//		var ol = subject.match(Compose.REGEX.ol) || [];
-//		if (ol[0]){
-//			var range = rangy.createRange();
-//			range.setStartAfter(selection.anchorNode.parentNode);
-//			range.setEndAfter(selection.anchorNode.parentNode);
-//			document.execCommand('insertOrderedList');
-//			
-//			//reinsert content without list marker
-//			selection.refresh();
-//			range.setStartBefore(selection.anchorNode);
-//			range.setEndAfter(selection.anchorNode);
-//			range.deleteContents();
-//			range.insertNode(document.createTextNode(subject.replace(/^1\. /, '')));
-//			
-//			//remove wrapping p element and reposition carret
-//			selection.refresh(true);
-//			var $list = $(selection.anchorNode).closest('ol');
-//			if ($list.parent().children().length === 1) $list.unwrap();
-//			selection.collapse(selection.anchorNode, 1);
-//		}
-//		
 //		var hr = subject.match(Compose.REGEX.hr) || [];
 //		if (hr[0]){
 //			var range = rangy.createRange();
@@ -193,18 +186,6 @@
 //			$previous = $(selection.anchorNode.parentNode);
 //			range.setStartBefore(selection.anchorNode);
 //			range.setEndAfter(selection.anchorNode);
-//			range.deleteContents();
-//			if ($previous.text() === '') $previous.remove();
-//		}
-//		
-//		var quote = subject.match(Compose.REGEX.quote) || [];
-//		if (quote[0]){
-//			var range = rangy.createRange();
-//			range.setStart(selection.anchorNode, subject.lastIndexOf('> ')+2);
-//			range.setEnd(selection.anchorNode, subject.length);
-//			this.wrapRange($('<blockquote>'), range);
-//			var $previous = $(range.startContainer.parentNode);
-//			range.setStart(selection.anchorNode, 0);
 //			range.deleteContents();
 //			if ($previous.text() === '') $previous.remove();
 //		}
