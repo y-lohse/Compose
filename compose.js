@@ -39,18 +39,42 @@
 				this.wrapRange($('<h'+titleLevel+'>'), range);
 			},
 			cleanup: function($insertedElement){
+				//remove #'s
 				$insertedElement.html($insertedElement.text().replace(/^#+ /, ''));
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
-			carret: function(selection, range, $insertedElement){
-				range.setStartAfter($insertedElement[0]);
-				range.setEndAfter($insertedElement[0]);
-				selection.removeAllRanges();
-				selection.addRange(range);
-			}
+			carret: 'end'
 		},
-//		'ul': /^(\*|\-|\+){1} [^*-]+/,
-//		'ol': /^1\. .+/,
+		'ul': {
+			expression: /^(\*|\-|\+){1} [^*-]+/g,
+			insert: function(match, range, selection){
+				document.execCommand('insertUnorderedList');
+			},
+			cleanup: function($insertedElement){
+				//emove the symbol that was used to create the list
+				$insertedElement.html($insertedElement.html().replace(/^(\*|\-|\+) /, ''));
+				
+				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
+				var $list = $insertedElement.closest('ul');
+				if ($list.parent().children().length === 1) $list.unwrap();
+			},
+			carret: 'end'
+		},
+		'ol': {
+			expression: /^1\. .+/g,
+			insert: function(match, range, selection){
+				document.execCommand('insertOrderedList');
+			},
+			cleanup: function($insertedElement){
+				//emove the symbol that was used to create the list
+				$insertedElement.html($insertedElement.html().replace(/^1\. /, ''));
+				
+				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
+				var $list = $insertedElement.closest('ol');
+				if ($list.parent().children().length === 1) $list.unwrap();
+			},
+			carret: 'end'
+		},
 //		'hr': /((\*|\-|_){1} ?){3,}/,
 //		'quote': /^> .+/,
 //		'em': /\*{1}.+\*{1}./,
@@ -120,51 +144,22 @@
 					format.cleanup.apply(this, [$insertedElement]);
 					
 					selection.refresh(true);
-					format.carret.apply(this, [selection, rangy.createRange(), $insertedElement]);
+					if ($.isFunction(format.carret)) format.carret.apply(this, [selection, rangy.createRange(), $insertedElement]);
+					else{
+						var range = rangy.createRange();
+						switch(format.carret){
+							case 'end':
+								range.setStartAfter($insertedElement[0]);
+								range.setEndAfter($insertedElement[0]);
+								selection.removeAllRanges();
+								selection.addRange(range);
+								break;
+						}
+					}
 				}
 			}
 		}
 		
-		
-		//insert, clean up, position carret
-		
-
-		
-		
-//		var title = subject.match(Compose.REGEX.title) || [];
-//		if (title[0]){
-//			var range = rangy.createRange(),
-//				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6);
-//				
-//			range.setStart(selection.anchorNode, subject.lastIndexOf('# ')+2);
-//			range.setEnd(selection.anchorNode, subject.length);
-//			this.wrapRange($('<h'+titleLevel+'>'), range);
-//			var $previous = $(range.startContainer.parentNode);
-//			range.setStart(selection.anchorNode, 0);
-//			range.deleteContents();
-//			if ($previous.text() === '') $previous.remove();
-//		}
-//		
-//		var ul = subject.match(Compose.REGEX.ul) || [];
-//		if (ul[0]){
-//			var range = rangy.createRange();
-//			range.setStartAfter(selection.anchorNode.parentNode);
-//			range.setEndAfter(selection.anchorNode.parentNode);
-//			document.execCommand('insertUnorderedList');
-//			
-//			//reinsert content without list marker
-//			selection.refresh();
-//			range.setStartBefore(selection.anchorNode);
-//			range.setEndAfter(selection.anchorNode);
-//			range.deleteContents();
-//			range.insertNode(document.createTextNode(subject.replace(/^(\*|\-|\+) /, '')));
-//			
-//			//remove wrapping p element and reposition carret
-//			selection.refresh(true);
-//			var $list = $(selection.anchorNode).closest('ul');
-//			if ($list.parent().children().length === 1) $list.unwrap();
-//			selection.collapse(selection.anchorNode, 1);
-//		}
 //		
 //		var ol = subject.match(Compose.REGEX.ol) || [];
 //		if (ol[0]){
