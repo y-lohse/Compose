@@ -37,7 +37,7 @@
 		'ol': /^1\. .+/,
 		'hr': /((\*|\-|_){1} ?){3,}/,
 		'quote': /^> .+/,
-		'emphasis': /\*{1}.+\*{1}/
+		'emphasis': /\*{1}.+\*{1}./
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -83,6 +83,8 @@
 	Compose.prototype.keyup = function(event){
 		var selection = rangy.getSelection(),
 			subject = selection.anchorNode.wholeText || '';
+			
+		//insert, clean up, position carret
 		
 		var title = subject.match(Compose.REGEX.title) || [];
 		if (title[0]){
@@ -169,18 +171,37 @@
 		
 		var emphasis = subject.match(Compose.REGEX.emphasis) || [];
 		if (emphasis.length){
-			var range = rangy.createRange();
 			for (var i = 0, l = emphasis.length; i < l; i++){
-				range.setStart(selection.anchorNode, subject.indexOf(emphasis[i])+1);
-				range.setEnd(selection.anchorNode, emphasis[i].length-1);
+				var index = subject.indexOf(emphasis[i]);
+				
+				var range = rangy.createRange();
+				range.setStart(selection.anchorNode, index);
+				range.setEnd(selection.anchorNode, index+emphasis[i].length-1);
+				selection.removeAllRanges();
+				selection.addRange(range);
 				this.wrapRange($('<em>'), range);
-				range.setStart(selection.anchorNode, subject.indexOf(emphasis[i]));
-				range.setEnd(selection.anchorNode, emphasis[i].length);
-				range.deleteContents();
+				
 				selection.refresh(true);
-//				range.setStartAfter(selection.anchorNode.parentNode);
-//				range.setEndAfter(selection.anchorNode.parentNode);
-//				selection.collapseToEnd();
+				range.setStart(selection.anchorNode, 0);
+				range.setEnd(selection.anchorNode, 1);
+				var range2 = rangy.createRange();
+				range2.setStart(selection.anchorNode, emphasis[i].length-2);
+				range2.setEnd(selection.anchorNode, emphasis[i].length-1);
+				range2.deleteContents();
+				range.deleteContents();
+				
+				selection.refresh(true);
+				range = rangy.createRange();
+				var childNodes = selection.anchorNode.parentNode.parentNode.childNodes;
+				
+				for (var i = 0, l = childNodes.length; i < l; i++){
+					if (childNodes[i] === selection.anchorNode.parentNode) break;
+				}
+				
+				range.setStart(childNodes.item(i+1), 1);
+				range.setEnd(childNodes.item(i+1), 1);
+				selection.removeAllRanges();
+				selection.addRange(range);
 			} 
 		}
 	};
