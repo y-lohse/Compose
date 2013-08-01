@@ -44,7 +44,7 @@
 			},
 			cleanup: function($insertedElement){
 				//remove #'s
-				$insertedElement.html($insertedElement.text().replace(/^#+ /, ''));
+				$insertedElement.text($insertedElement.text().replace(/^#+ /, ''));
 				//titles usually spring out of p tags, but the p isn't removed even if it's empty
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
@@ -60,7 +60,7 @@
 			},
 			cleanup: function($insertedElement){
 				//essentially same as title
-				$insertedElement.html($insertedElement.text().replace(/^> /, ''));
+				$insertedElement.text($insertedElement.text().replace(/^> /, ''));
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: 'end'
@@ -76,7 +76,7 @@
 			},
 			cleanup: function($insertedElement){
 				//emove the symbol that was used to create the list
-				$insertedElement.html($insertedElement.html().replace(/^(\*|\-|\+) /, ''));
+				$insertedElement.text($insertedElement.text().replace(/^(\*|\-|\+) /, ''));
 				
 				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
 				var $list = $insertedElement.closest('ul');
@@ -94,7 +94,7 @@
 			},
 			cleanup: function($insertedElement){
 				//emove the symbol that was used to create the list
-				$insertedElement.html($insertedElement.html().replace(/^1\. /, ''));
+				$insertedElement.text($insertedElement.html().text(/^1\. /, ''));
 				
 				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
 				var $list = $insertedElement.closest('ol');
@@ -118,8 +118,29 @@
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: function(){}//doesn't need anything
+		},
+		//inline tags
+		'em': {
+			expression: /\*{1}.+\*{1}./g,
+			insert: function(match, range, selection){
+				var rangeBackup = [range.startOffset, range.endOffset];
+				
+				range.setEnd(selection.anchorNode, range.endOffset-1);
+				this.wrapRange($('<em>'), range);
+				range.setStart(selection.anchorNode, range.endOffset);
+				range.setEnd(selection.anchorNode, range.endOffset+1);
+				
+				document.execCommand('insertHTML', false, range.toString());
+				
+				range.setStart(selection.anchorNode, rangeBackup[0]);
+				range.setEnd(selection.anchorNode, rangeBackup[1]);
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
+			},
+			cleanup: function(){},
+			carret: function(){}
 		}
-//		'em': /\*{1}.+\*{1}./,
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -200,58 +221,6 @@
 				}
 			}
 		}
-		
-//		
-//		var hr = subject.match(Compose.REGEX.hr) || [];
-//		if (hr[0]){
-//			var range = rangy.createRange();
-//			range.setStartAfter(selection.anchorNode.parentNode);
-//			range.setEndAfter(selection.anchorNode.parentNode);
-//			document.execCommand('insertHTML', false, '<hr />');
-//			document.execCommand('insertHTML', false, '<p></p>');
-//			
-//			$previous = $(selection.anchorNode.parentNode);
-//			range.setStartBefore(selection.anchorNode);
-//			range.setEndAfter(selection.anchorNode);
-//			range.deleteContents();
-//			if ($previous.text() === '') $previous.remove();
-//		}
-//		
-//		var emphasis = subject.match(Compose.REGEX.emphasis) || [];
-//		if (emphasis.length){
-//			for (var i = 0, l = emphasis.length; i < l; i++){
-//				var index = subject.indexOf(emphasis[i]);
-//				
-//				var range = rangy.createRange();
-//				range.setStart(selection.anchorNode, index);
-//				range.setEnd(selection.anchorNode, index+emphasis[i].length-1);
-//				selection.removeAllRanges();
-//				selection.addRange(range);
-//				this.wrapRange($('<em>'), range);
-//				
-//				selection.refresh(true);
-//				range.setStart(selection.anchorNode, 0);
-//				range.setEnd(selection.anchorNode, 1);
-//				var range2 = rangy.createRange();
-//				range2.setStart(selection.anchorNode, emphasis[i].length-2);
-//				range2.setEnd(selection.anchorNode, emphasis[i].length-1);
-//				range2.deleteContents();
-//				range.deleteContents();
-//				
-//				selection.refresh(true);
-//				range = rangy.createRange();
-//				var childNodes = selection.anchorNode.parentNode.parentNode.childNodes;
-//				
-//				for (var i = 0, l = childNodes.length; i < l; i++){
-//					if (childNodes[i] === selection.anchorNode.parentNode) break;
-//				}
-//				
-//				range.setStart(childNodes.item(i+1), 1);
-//				range.setEnd(childNodes.item(i+1), 1);
-//				selection.removeAllRanges();
-//				selection.addRange(range);
-//			} 
-//		}
 	};
 	
 	$(function(){
