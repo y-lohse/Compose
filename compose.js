@@ -38,6 +38,9 @@
 			insert: function(match, range, selection){
 				var titleLevel = Math.min(match.substring(0, match.indexOf(' ')).split('').length, 6);
 				this.wrapRange($('<h'+titleLevel+'>'), range);
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
 				//remove #'s
@@ -51,6 +54,9 @@
 			expression: /^> .+/g,
 			insert: function(match, range, selection){
 				this.wrapRange($('<blockquote>'), range);
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
 				//essentially same as title
@@ -64,6 +70,9 @@
 			expression: /^(\*|\-|\+){1} [^*-]+/g,
 			insert: function(match, range, selection){
 				document.execCommand('insertUnorderedList');
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
 				//emove the symbol that was used to create the list
@@ -79,6 +88,9 @@
 			expression: /^1\. .+/g,
 			insert: function(match, range, selection){
 				document.execCommand('insertOrderedList');
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
 				//emove the symbol that was used to create the list
@@ -90,7 +102,23 @@
 			},
 			carret: 'end'
 		},
-//		'hr': /((\*|\-|_){1} ?){3,}/,
+		//strange block level tags
+		'hr': {
+			expression: /((\*|\-|_){1} ?){3,}/g,
+			insert: function(match, range, selection){
+				//insert hr tag and create the next paragraph
+				document.execCommand('insertHTML', false, '<hr />');
+				document.execCommand('insertHTML', false, '<p></p>');
+			
+				selection.refresh(true);
+				return $(selection.anchorNode).prev();
+			},
+			cleanup: function($insertedElement){
+				//same issue as titles
+				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
+			},
+			carret: function(){}//doesn't need anything
+		}
 //		'em': /\*{1}.+\*{1}./,
 	};
 	
@@ -150,11 +178,10 @@
 					
 					var selection = rangy.getSelection();
 					
-					format.insert.apply(this, [matches[i], range, selection]);
+					var $insertedElement = format.insert.apply(this, [matches[i], range, selection]);
 					range.deleteContents();
 					
 					selection.refresh(true);
-					var $insertedElement = $(selection.anchorNode.parentNode);
 					format.cleanup.apply(this, [$insertedElement]);
 					
 					selection.refresh(true);
