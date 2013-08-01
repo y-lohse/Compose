@@ -31,13 +31,29 @@
 		}, this));
 	};
 	
-	Compose.REGEX = {
-		'title': /^#+ .+/,
-		'ul': /^(\*|\-|\+){1} [^*-]+/,
-		'ol': /^1\. .+/,
-		'hr': /((\*|\-|_){1} ?){3,}/,
-		'quote': /^> .+/,
-		'emphasis': /\*{1}.+\*{1}./
+	Compose.MarkDown = {
+		'title': {
+			expression: /^#+ .+/g,
+			insert: function(match, range, selection){
+				var titleLevel = Math.min(match.substring(0, match.indexOf(' ')).split('').length, 6);
+				this.wrapRange($('<h'+titleLevel+'>'), range);
+			},
+			cleanup: function($insertedElement){
+				$insertedElement.html($insertedElement.text().replace(/^#+ /, ''));
+				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
+			},
+			carret: function(selection, range, $insertedElement){
+				range.setStartAfter($insertedElement[0]);
+				range.setEndAfter($insertedElement[0]);
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
+		},
+//		'ul': /^(\*|\-|\+){1} [^*-]+/,
+//		'ol': /^1\. .+/,
+//		'hr': /((\*|\-|_){1} ?){3,}/,
+//		'quote': /^> .+/,
+//		'em': /\*{1}.+\*{1}./,
 	};
 	
 	Compose.prototype.addTool = function(tool){
@@ -84,126 +100,155 @@
 		var selection = rangy.getSelection(),
 			subject = selection.anchorNode.wholeText || '';
 			
+		for (var formatKey in Compose.MarkDown){
+			var format = Compose.MarkDown[formatKey];
+			
+			var matches = subject.match(format.expression) || [];
+			if (matches.length){
+				for (var i = 0, l = matches.length; i < l; i++){
+					var range = rangy.createRange();
+					range.setStart(selection.anchorNode, subject.indexOf(matches[i]));
+					range.setEnd(selection.anchorNode, subject.indexOf(matches[i])+matches[i].length);
+					
+					var selection = rangy.getSelection();
+					
+					format.insert.apply(this, [matches[i], range, selection]);
+					range.deleteContents();
+					
+					selection.refresh(true);
+					var $insertedElement = $(selection.anchorNode.parentNode);
+					format.cleanup.apply(this, [$insertedElement]);
+					
+					selection.refresh(true);
+					format.carret.apply(this, [selection, rangy.createRange(), $insertedElement]);
+				}
+			}
+		}
+		
+		
 		//insert, clean up, position carret
 		
-		var title = subject.match(Compose.REGEX.title) || [];
-		if (title[0]){
-			var range = rangy.createRange(),
-				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6);
-				
-			range.setStart(selection.anchorNode, subject.lastIndexOf('# ')+2);
-			range.setEnd(selection.anchorNode, subject.length);
-			this.wrapRange($('<h'+titleLevel+'>'), range);
-			var $previous = $(range.startContainer.parentNode);
-			range.setStart(selection.anchorNode, 0);
-			range.deleteContents();
-			if ($previous.text() === '') $previous.remove();
-		}
+
 		
-		var ul = subject.match(Compose.REGEX.ul) || [];
-		if (ul[0]){
-			var range = rangy.createRange();
-			range.setStartAfter(selection.anchorNode.parentNode);
-			range.setEndAfter(selection.anchorNode.parentNode);
-			document.execCommand('insertUnorderedList');
-			
-			//reinsert content without list marker
-			selection.refresh();
-			range.setStartBefore(selection.anchorNode);
-			range.setEndAfter(selection.anchorNode);
-			range.deleteContents();
-			range.insertNode(document.createTextNode(subject.replace(/^(\*|\-|\+) /, '')));
-			
-			//remove wrapping p element and reposition carret
-			selection.refresh(true);
-			var $list = $(selection.anchorNode).closest('ul');
-			if ($list.parent().children().length === 1) $list.unwrap();
-			selection.collapse(selection.anchorNode, 1);
-		}
 		
-		var ol = subject.match(Compose.REGEX.ol) || [];
-		if (ol[0]){
-			var range = rangy.createRange();
-			range.setStartAfter(selection.anchorNode.parentNode);
-			range.setEndAfter(selection.anchorNode.parentNode);
-			document.execCommand('insertOrderedList');
-			
-			//reinsert content without list marker
-			selection.refresh();
-			range.setStartBefore(selection.anchorNode);
-			range.setEndAfter(selection.anchorNode);
-			range.deleteContents();
-			range.insertNode(document.createTextNode(subject.replace(/^1\. /, '')));
-			
-			//remove wrapping p element and reposition carret
-			selection.refresh(true);
-			var $list = $(selection.anchorNode).closest('ol');
-			if ($list.parent().children().length === 1) $list.unwrap();
-			selection.collapse(selection.anchorNode, 1);
-		}
-		
-		var hr = subject.match(Compose.REGEX.hr) || [];
-		if (hr[0]){
-			var range = rangy.createRange();
-			range.setStartAfter(selection.anchorNode.parentNode);
-			range.setEndAfter(selection.anchorNode.parentNode);
-			document.execCommand('insertHTML', false, '<hr />');
-			document.execCommand('insertHTML', false, '<p></p>');
-			
-			$previous = $(selection.anchorNode.parentNode);
-			range.setStartBefore(selection.anchorNode);
-			range.setEndAfter(selection.anchorNode);
-			range.deleteContents();
-			if ($previous.text() === '') $previous.remove();
-		}
-		
-		var quote = subject.match(Compose.REGEX.quote) || [];
-		if (quote[0]){
-			var range = rangy.createRange();
-			range.setStart(selection.anchorNode, subject.lastIndexOf('> ')+2);
-			range.setEnd(selection.anchorNode, subject.length);
-			this.wrapRange($('<blockquote>'), range);
-			var $previous = $(range.startContainer.parentNode);
-			range.setStart(selection.anchorNode, 0);
-			range.deleteContents();
-			if ($previous.text() === '') $previous.remove();
-		}
-		
-		var emphasis = subject.match(Compose.REGEX.emphasis) || [];
-		if (emphasis.length){
-			for (var i = 0, l = emphasis.length; i < l; i++){
-				var index = subject.indexOf(emphasis[i]);
-				
-				var range = rangy.createRange();
-				range.setStart(selection.anchorNode, index);
-				range.setEnd(selection.anchorNode, index+emphasis[i].length-1);
-				selection.removeAllRanges();
-				selection.addRange(range);
-				this.wrapRange($('<em>'), range);
-				
-				selection.refresh(true);
-				range.setStart(selection.anchorNode, 0);
-				range.setEnd(selection.anchorNode, 1);
-				var range2 = rangy.createRange();
-				range2.setStart(selection.anchorNode, emphasis[i].length-2);
-				range2.setEnd(selection.anchorNode, emphasis[i].length-1);
-				range2.deleteContents();
-				range.deleteContents();
-				
-				selection.refresh(true);
-				range = rangy.createRange();
-				var childNodes = selection.anchorNode.parentNode.parentNode.childNodes;
-				
-				for (var i = 0, l = childNodes.length; i < l; i++){
-					if (childNodes[i] === selection.anchorNode.parentNode) break;
-				}
-				
-				range.setStart(childNodes.item(i+1), 1);
-				range.setEnd(childNodes.item(i+1), 1);
-				selection.removeAllRanges();
-				selection.addRange(range);
-			} 
-		}
+//		var title = subject.match(Compose.REGEX.title) || [];
+//		if (title[0]){
+//			var range = rangy.createRange(),
+//				titleLevel = Math.min(subject.substring(0, subject.indexOf(' ')).split('').length, 6);
+//				
+//			range.setStart(selection.anchorNode, subject.lastIndexOf('# ')+2);
+//			range.setEnd(selection.anchorNode, subject.length);
+//			this.wrapRange($('<h'+titleLevel+'>'), range);
+//			var $previous = $(range.startContainer.parentNode);
+//			range.setStart(selection.anchorNode, 0);
+//			range.deleteContents();
+//			if ($previous.text() === '') $previous.remove();
+//		}
+//		
+//		var ul = subject.match(Compose.REGEX.ul) || [];
+//		if (ul[0]){
+//			var range = rangy.createRange();
+//			range.setStartAfter(selection.anchorNode.parentNode);
+//			range.setEndAfter(selection.anchorNode.parentNode);
+//			document.execCommand('insertUnorderedList');
+//			
+//			//reinsert content without list marker
+//			selection.refresh();
+//			range.setStartBefore(selection.anchorNode);
+//			range.setEndAfter(selection.anchorNode);
+//			range.deleteContents();
+//			range.insertNode(document.createTextNode(subject.replace(/^(\*|\-|\+) /, '')));
+//			
+//			//remove wrapping p element and reposition carret
+//			selection.refresh(true);
+//			var $list = $(selection.anchorNode).closest('ul');
+//			if ($list.parent().children().length === 1) $list.unwrap();
+//			selection.collapse(selection.anchorNode, 1);
+//		}
+//		
+//		var ol = subject.match(Compose.REGEX.ol) || [];
+//		if (ol[0]){
+//			var range = rangy.createRange();
+//			range.setStartAfter(selection.anchorNode.parentNode);
+//			range.setEndAfter(selection.anchorNode.parentNode);
+//			document.execCommand('insertOrderedList');
+//			
+//			//reinsert content without list marker
+//			selection.refresh();
+//			range.setStartBefore(selection.anchorNode);
+//			range.setEndAfter(selection.anchorNode);
+//			range.deleteContents();
+//			range.insertNode(document.createTextNode(subject.replace(/^1\. /, '')));
+//			
+//			//remove wrapping p element and reposition carret
+//			selection.refresh(true);
+//			var $list = $(selection.anchorNode).closest('ol');
+//			if ($list.parent().children().length === 1) $list.unwrap();
+//			selection.collapse(selection.anchorNode, 1);
+//		}
+//		
+//		var hr = subject.match(Compose.REGEX.hr) || [];
+//		if (hr[0]){
+//			var range = rangy.createRange();
+//			range.setStartAfter(selection.anchorNode.parentNode);
+//			range.setEndAfter(selection.anchorNode.parentNode);
+//			document.execCommand('insertHTML', false, '<hr />');
+//			document.execCommand('insertHTML', false, '<p></p>');
+//			
+//			$previous = $(selection.anchorNode.parentNode);
+//			range.setStartBefore(selection.anchorNode);
+//			range.setEndAfter(selection.anchorNode);
+//			range.deleteContents();
+//			if ($previous.text() === '') $previous.remove();
+//		}
+//		
+//		var quote = subject.match(Compose.REGEX.quote) || [];
+//		if (quote[0]){
+//			var range = rangy.createRange();
+//			range.setStart(selection.anchorNode, subject.lastIndexOf('> ')+2);
+//			range.setEnd(selection.anchorNode, subject.length);
+//			this.wrapRange($('<blockquote>'), range);
+//			var $previous = $(range.startContainer.parentNode);
+//			range.setStart(selection.anchorNode, 0);
+//			range.deleteContents();
+//			if ($previous.text() === '') $previous.remove();
+//		}
+//		
+//		var emphasis = subject.match(Compose.REGEX.emphasis) || [];
+//		if (emphasis.length){
+//			for (var i = 0, l = emphasis.length; i < l; i++){
+//				var index = subject.indexOf(emphasis[i]);
+//				
+//				var range = rangy.createRange();
+//				range.setStart(selection.anchorNode, index);
+//				range.setEnd(selection.anchorNode, index+emphasis[i].length-1);
+//				selection.removeAllRanges();
+//				selection.addRange(range);
+//				this.wrapRange($('<em>'), range);
+//				
+//				selection.refresh(true);
+//				range.setStart(selection.anchorNode, 0);
+//				range.setEnd(selection.anchorNode, 1);
+//				var range2 = rangy.createRange();
+//				range2.setStart(selection.anchorNode, emphasis[i].length-2);
+//				range2.setEnd(selection.anchorNode, emphasis[i].length-1);
+//				range2.deleteContents();
+//				range.deleteContents();
+//				
+//				selection.refresh(true);
+//				range = rangy.createRange();
+//				var childNodes = selection.anchorNode.parentNode.parentNode.childNodes;
+//				
+//				for (var i = 0, l = childNodes.length; i < l; i++){
+//					if (childNodes[i] === selection.anchorNode.parentNode) break;
+//				}
+//				
+//				range.setStart(childNodes.item(i+1), 1);
+//				range.setEnd(childNodes.item(i+1), 1);
+//				selection.removeAllRanges();
+//				selection.addRange(range);
+//			} 
+//		}
 	};
 	
 	$(function(){
