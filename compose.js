@@ -169,6 +169,45 @@
 				selection.removeAllRanges();
 				selection.addRange(range);
 			}
+		},
+		'link': {
+			expression: /\[.+\]\(.+( ".+")?\)./g,
+			insert: function(match, range, selection){
+				var link, title;
+				
+				link = match.match(/(\(.+( ".+")?\))/g)[0];
+				link = link.substring(1, link.length-1);
+				
+				if (link.match(/ ".+"/g)){
+					var chunks = link.split(' "');
+					title = chunks[1].substring(0, chunks[1].length-1);
+					link = chunks[0];
+				}
+				
+				range.setEnd(selection.anchorNode, range.endOffset-1);
+				this.wrapRange($('<a>').attr('href', link).attr('title', title), range);
+				
+				selection.refresh(true);
+				return $(selection.anchorNode.parentNode);
+			},
+			cleanup: function($insertedElement){
+				var textContent = $insertedElement.text().match(/(\[.+\])/g)[0]
+				textContent = textContent.substring(1, textContent.length-1);
+				
+				$insertedElement.text(textContent);
+			},
+			carret: function(selection, range, $insertedElement){
+				var childNodes = $insertedElement[0].parentNode.childNodes;
+				
+				for (var i = 0, l = childNodes.length; i < l; i++){
+					if (childNodes[i] === $insertedElement[0]) break;
+				}
+				
+				range.setStart(childNodes.item(i+1), 1);
+				range.setEnd(childNodes.item(i+1), 1);
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
 		}
 	};
 	
