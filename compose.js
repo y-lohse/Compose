@@ -116,7 +116,7 @@
 		},
 		//inline tags
 		'em': {
-			expression: /\*{1}.+\*{1}./g,
+			expression: /(\*|_){1}.+(\*|_){1}./g,
 			insert: function(match, range, selection){
 				var rangeBackup = range.cloneRange();;
 				
