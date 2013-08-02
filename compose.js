@@ -116,7 +116,8 @@
 		},
 		//inline tags
 		'em': {
-			expression: /(\*|_){1}.+(\*|_){1}./g,
+			//match a * not followed by a * or a space but followed by at least one thing which is not a * (but can be a space) followed by another *, itself followed by anything except a *. oh, and the same with _ instead of *.
+			expression: /(\*(?!(\*| ))[^\*]+\*[^\*]+)|(_(?!(_| ))[^_]+_[^_]+)/g,
 			insert: function(match, range, selection){
 				var rangeBackup = range.cloneRange();;
 				
