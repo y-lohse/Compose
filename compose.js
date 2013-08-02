@@ -144,6 +144,35 @@
 				selection.removeAllRanges();
 				selection.addRange(range);
 			}
+		},
+		'strong': {
+			expression: /\*{2}.+\*{2}./g,
+			insert: function(match, range, selection){
+				var rangeBackup = range.cloneRange();;
+				
+				range.setEnd(selection.anchorNode, range.endOffset-1);
+				this.wrapRange($('<strong>'), range);
+				
+				selection.refresh(true);
+				var $element = $(selection.anchorNode.parentNode);
+				
+				return $element;
+			},
+			cleanup: function($insertElement){
+				$insertElement.text($insertElement.text().substring(2, $insertElement.text().length-2));
+			},
+			carret: function(selection, range, $insertedElement){
+				var childNodes = $insertedElement[0].parentNode.childNodes;
+				
+				for (var i = 0, l = childNodes.length; i < l; i++){
+					if (childNodes[i] === $insertedElement[0]) break;
+				}
+				
+				range.setStart(childNodes.item(i+1), 1);
+				range.setEnd(childNodes.item(i+1), 1);
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
 		}
 	};
 	
