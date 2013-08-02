@@ -10,6 +10,7 @@
 								  .on('keyup', $.proxy(this.keyup, this));
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
+						.addClass('compose-toolbar')
 						.css({
 							'position': 'absolute',
 							'top': 0,
@@ -211,11 +212,6 @@
 		}
 	};
 	
-	Compose.prototype.addTool = function(tool){
-		this.$toolbar.append(tool);
-		return this;
-	};
-	
 	Compose.prototype.selectionStart = function(event){
 		this.selecting = true;
 	};
@@ -247,20 +243,6 @@
 		selection.removeAllRanges();
 		selection.addRange(clone);
 		this.$toolbar.show();
-	};
-	
-	Compose.prototype.wrapRange = function(elem, range){
-		if (range){
-			var sel = rangy.getSelection();
-			sel.removeAllRanges();
-			sel.addRange(range);
-		}
-		else{
-			range = rangy.getSelection().getRangeAt(0);
-		}
-		elem = $(elem).text(range.toString());
-		
-		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
 	};
 	
 	Compose.prototype.keyup = function(event){
@@ -302,13 +284,32 @@
 		}
 	};
 	
-	$(function(){
-		var compose = new Compose('#composearea');
-		var bold = $('<button>')
-					.html('b');
-		bold.click(function(event){
-			compose.wrapRange('<strong>');
-		});
-		compose.addTool(bold);
-	});
+	Compose.prototype.addTools = function(tools){
+		tools = ($.isArray(tools)) ? tools : [tools];
+		
+		for (var i = 0, l = tools.length; i < l; i++){
+			this.$toolbar.append(tools[i]);
+			tools[i].trigger('compose-init', this);
+		}
+		
+		return this;
+	};
+	
+	Compose.prototype.wrapRange = function(elem, range){
+		if (range){
+			var sel = rangy.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+		else{
+			range = rangy.getSelection().getRangeAt(0);
+		}
+		elem = $(elem).text(range.toString());
+		
+		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
+		
+		return this;
+	};
+	
+	window['Compose'] = Compose;
 })(window.jQuery);

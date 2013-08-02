@@ -40,5 +40,12 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 		<script src="rangy.js"></script>
 		<script src="compose.js"></script>
+		<script src="compose-tools.js"></script>
+		<script>
+			$(function(){
+				var compose = new Compose('#composearea');
+				compose.addTools(ComposeTools);
+			});
+		</script>
 	</body>
 </html>
