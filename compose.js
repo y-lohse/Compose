@@ -117,10 +117,8 @@
 		//inline tags
 		'em': {
 			//match a * not followed by a * or a space but followed by at least one thing which is not a * (but can be a space) followed by another *, itself followed by anything except a *. oh, and the same with _ instead of *.
-			expression: /(\*(?!(\*| ))[^\*]+\*[^\*]+)|(_(?!(_| ))[^_]+_[^_]+)/g,
+			expression: /(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g,
 			insert: function(match, range, selection){
-				var rangeBackup = range.cloneRange();;
-				
 				range.setEnd(selection.anchorNode, range.endOffset-1);
 				this.wrapRange($('<em>'), range);
 				
@@ -148,8 +146,6 @@
 		'strong': {
 			expression: /\*{2}.+\*{2}./g,
 			insert: function(match, range, selection){
-				var rangeBackup = range.cloneRange();;
-				
 				range.setEnd(selection.anchorNode, range.endOffset-1);
 				this.wrapRange($('<strong>'), range);
 				
