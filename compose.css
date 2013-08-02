@@ -1,0 +1,15 @@
+.compose-toolbar{
+	background: #333;
+}
+.compose-toolbar button{
+	background: none;
+	border: none;
+}
+.compose-toolbar .compose-tool{
+	display: inline-block;
+	width: 20px;
+	padding: 8px 4px;
+	color: #fff;
+	text-align:: center;
+	cursor: pointer;
+}
