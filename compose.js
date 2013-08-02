@@ -144,7 +144,7 @@
 			}
 		},
 		'strong': {
-			expression: /\*{2}.+\*{2}./g,
+			expression: /(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g,
 			insert: function(match, range, selection){
 				range.setEnd(selection.anchorNode, range.endOffset-1);
 				this.wrapRange($('<strong>'), range);
