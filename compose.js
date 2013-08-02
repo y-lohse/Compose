@@ -43,10 +43,7 @@
 				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
-				//remove #'s
 				$insertedElement.text($insertedElement.text().replace(/^#+ /, ''));
-				//titles usually spring out of p tags, but the p isn't removed even if it's empty
-				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: 'end'
 		},
@@ -59,9 +56,7 @@
 				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
-				//essentially same as title
 				$insertedElement.text($insertedElement.text().replace(/^> /, ''));
-				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: 'end'
 		},
@@ -75,7 +70,6 @@
 				return $(selection.anchorNode.parentNode);
 			},
 			cleanup: function($insertedElement){
-				//emove the symbol that was used to create the list
 				$insertedElement.text($insertedElement.text().replace(/^(\*|\-|\+) /, ''));
 				
 				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
@@ -104,17 +98,18 @@
 		},
 		//strange block level tags
 		'hr': {
-			expression: /((\*|\-|_){1} ?){3,}/g,
+			expression: /^((\*|\-|_){1} ?){3,}/g,
 			insert: function(match, range, selection){
 				//insert hr tag and create the next paragraph
 				document.execCommand('insertHTML', false, '<hr />');
 				document.execCommand('insertHTML', false, '<p></p>');
-			
+				
 				selection.refresh(true);
+				range.deleteContents();
 				return $(selection.anchorNode).prev();
 			},
 			cleanup: function($insertedElement){
-				//same issue as titles
+				//hr are created from within p tags, and if there was nothing else in it it remains there when it shouldn't
 				if ($insertedElement.prev().text() === '') $insertedElement.prev().remove();
 			},
 			carret: function(){}//doesn't need anything
@@ -123,23 +118,31 @@
 		'em': {
 			expression: /\*{1}.+\*{1}./g,
 			insert: function(match, range, selection){
-				var rangeBackup = [range.startOffset, range.endOffset];
+				var rangeBackup = range.cloneRange();;
 				
 				range.setEnd(selection.anchorNode, range.endOffset-1);
 				this.wrapRange($('<em>'), range);
-				range.setStart(selection.anchorNode, range.endOffset);
-				range.setEnd(selection.anchorNode, range.endOffset+1);
-				
-				document.execCommand('insertHTML', false, range.toString());
-				
-				range.setStart(selection.anchorNode, rangeBackup[0]);
-				range.setEnd(selection.anchorNode, rangeBackup[1]);
 				
 				selection.refresh(true);
-				return $(selection.anchorNode.parentNode);
+				var $element = $(selection.anchorNode.parentNode);
+				
+				return $element;
 			},
-			cleanup: function(){},
-			carret: function(){}
+			cleanup: function($insertElement){
+				$insertElement.text($insertElement.text().substring(1, $insertElement.text().length-1));
+			},
+			carret: function(selection, range, $insertedElement){
+				var childNodes = $insertedElement[0].parentNode.childNodes;
+				
+				for (var i = 0, l = childNodes.length; i < l; i++){
+					if (childNodes[i] === $insertedElement[0]) break;
+				}
+				
+				range.setStart(childNodes.item(i+1), 1);
+				range.setEnd(childNodes.item(i+1), 1);
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
 		}
 	};
 	
@@ -177,7 +180,14 @@
 	};
 	
 	Compose.prototype.wrapRange = function(elem, range){
-		range = range || rangy.getSelection().getRangeAt(0);
+		if (range){
+			var sel = rangy.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+		else{
+			range = rangy.getSelection().getRangeAt(0);
+		}
 		elem = $(elem).text(range.toString());
 		
 		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
@@ -200,7 +210,6 @@
 					var selection = rangy.getSelection();
 					
 					var $insertedElement = format.insert.apply(this, [matches[i], range, selection]);
-					range.deleteContents();
 					
 					selection.refresh(true);
 					format.cleanup.apply(this, [$insertedElement]);
