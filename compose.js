@@ -227,15 +227,20 @@
 			return;
 		}
 		
+		setTimeout($.proxy(function(){
+			if (rangy.getSelection().isCollapsed){
+				this.$toolbar.hide();
+			}
+		}, this), 0);
+		
 		var $positionElem = $('<span>'),
 			range = selection.getRangeAt(0),
 			clone = range.cloneRange();
 		(range.nativeRange.insertNode) ? range.nativeRange.insertNode($positionElem[0]) : range.insertNode($positionElem[0]);
 		var position = $positionElem.offset();
 		//@TODO : check for colision with browser boundaries
-		//@TODO: remove fixed value
 		this.$toolbar.css({
-			top: position.top-20,
+			top: position.top-this.$toolbar.height(),
 			left: position.left,
 		});
 		$positionElem.remove();
