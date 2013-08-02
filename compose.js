@@ -89,7 +89,7 @@
 			},
 			cleanup: function($insertedElement){
 				//emove the symbol that was used to create the list
-				$insertedElement.text($insertedElement.html().text(/^1\. /, ''));
+				$insertedElement.text($insertedElement.text().replace(/^1\. /, ''));
 				
 				//lists tend to be wrapped in p tags, so here we remove the list wrapper if there's nothing else in it
 				var $list = $insertedElement.closest('ol');
@@ -137,8 +137,8 @@
 				for (var i = 0, l = childNodes.length; i < l; i++){
 					if (childNodes[i] === $insertedElement[0]) break;
 				}
-				
-				range.setStart(childNodes.item(i+1), 1);
+
+				range.setStart(childNodes.item(i+1), 0);
 				range.setEnd(childNodes.item(i+1), 1);
 				selection.removeAllRanges();
 				selection.addRange(range);
@@ -272,10 +272,11 @@
 						var range = rangy.createRange();
 						switch(format.carret){
 							case 'end':
-								range.setStartAfter($insertedElement[0]);
-								range.setEndAfter($insertedElement[0]);
+								range.setStart($insertedElement.contents()[0], $insertedElement.text().length);
+								range.setEnd($insertedElement.contents()[0], $insertedElement.text().length);
 								selection.removeAllRanges();
 								selection.addRange(range);
+								selection.collapseToEnd();
 								break;
 						}
 					}
