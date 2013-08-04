@@ -87,7 +87,7 @@
 		];
 		//the em one is a bit crazy, here's what it does :
 		//match a * not followed by (a * or a space) but followed by at least one thing which is not a * (but can be a space) followed by another *, itself followed by anything except a *. oh, and the same with _ instead of *.
-		
+			
 		var convert = false;
 		for (var i = 0, l = triggers.length; i < l; i++){
 			if (subject.match(triggers[i])){
@@ -97,6 +97,8 @@
 		}
 
 		if (convert){
+			var initialPosition = selection.focusOffset;
+			
 			var range = rangy.createRange();
 			range.setStart(selection.anchorNode);
 			range.setEnd(selection.anchorNode, subject.length);
@@ -106,7 +108,28 @@
 			selection.removeAllRanges();
 			selection.addRange(range);
 			
-			document.execCommand('insertHTML', false, html);	
+			document.execCommand('insertHTML', false, html);
+			
+			selection.refresh(true);
+			
+			var carret = rangy.createRange();
+			
+			if (subject.length === initialPosition){
+				//carret was at the end, reposition it there
+				var nextNode = selection.anchorNode;
+				
+				carret.setStart(nextNode, nextNode.textContent.length);
+				carret.setEnd(nextNode, nextNode.textContent.length);
+			}
+			else{
+				var nextNode = selection.anchorNode;
+				//carret was somewhere else, try to reposition it hwere it was
+				carret.setStart(nextNode);
+				carret.setEnd(nextNode);
+			}
+			
+			selection.removeAllRanges();
+			selection.addRange(carret);
 		}
 	};
 	
