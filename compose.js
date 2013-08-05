@@ -31,8 +31,13 @@
 			this.selecting = false;
 		}, this));
 		
+		this.mdOptions = {
+			gfm: false,
+			smartypants: true,
+		};
+		
 		var text = this.$element.html();
-		this.$element.html(marked(text.replace(/	/g, '')));
+		this.$element.html(marked(text.replace(/	/g, ''), this.mdOptions));
 	};
 	
 	Compose.prototype.selectionStart = function(event){
@@ -81,6 +86,12 @@
 			/(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g, //em
 			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
 			/\[.+\]\(.+( ".+")?\)./g,	//link
+			/\.{3}./g,					//ellipsis
+			/--./g,						//em dash
+			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
+			/(^|[-\u2014/(\[{\u2018\s])"/,	//opening doubles
+			/'/g,						//closing single
+			/"/g,						//closing doubles
 		];
 		//the em one is a bit crazy, here's what it does :
 		//match a * not followed by (a * or a space) but followed by at least one thing which is not a * (but can be a space) followed by another *, itself followed by anything except a *. oh, and the same with _ instead of *.
@@ -97,7 +108,7 @@
 			var initialPosition = selection.focusOffset;
 			var $parent = $(selection.anchorNode.parentNode);
 			
-			var $html = $(marked(subject));
+			var $html = $(marked(subject, this.mdOptions));
 			
 			$parent.html($html);
 			if ($html.is('h1, h2, h3, h4, h5, h6, blockquote, ul, ol, hr, p') && $parent.is('p')) $html.unwrap();
