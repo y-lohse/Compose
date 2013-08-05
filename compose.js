@@ -31,7 +31,7 @@
 			this.selecting = false;
 		}, this));
 		
-		var text = this.$element.text();
+		var text = this.$element.html();
 		this.$element.html(marked(text.replace(/	/g, '')));
 	};
 	
