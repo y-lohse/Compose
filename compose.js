@@ -86,7 +86,7 @@
 			/^\s{4}./g,					//code block
 			/(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g, //em
 			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
-			/\[.+\]\(.+( ".+")?\)./g,	//link
+			/\[.+\]\(.+( ".+")?\)/g,	//link
 			/\.{3}./g,					//ellipsis
 			/--./g,						//em dash
 			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
@@ -109,7 +109,7 @@
 			var initialPosition = selection.focusOffset;
 			var $parent = $(selection.anchorNode.parentNode);
 			
-			var $html = $(marked(subject, this.mdOptions));
+			var $html = $(marked($parent.html(), this.mdOptions));
 			
 			$parent.html($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
