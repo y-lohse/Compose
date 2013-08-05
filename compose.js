@@ -141,14 +141,12 @@
 				node = $html.next()[0];
 			}
 			else {
-				//get the last node recursively
+				//get the last block node recursively
 				var $node = $html;
-				while ($node.children().length > 0){
+				while ($node.children('li, p, code').length > 0){
 					$node = $node.children().last();
 				}
-				node = $node[0];
-				
-				node = node.childNodes[node.childNodes.length-1];
+				node = $node[0].childNodes[$node[0].childNodes.length-1];
 			}
 			
 			carret.setStart(node, node.textContent.length);
