@@ -97,59 +97,28 @@
 			var initialPosition = selection.focusOffset;
 			var $parent = $(selection.anchorNode.parentNode);
 			
-			var range = rangy.createRange();
-			range.setStart(selection.anchorNode);
-			range.setEnd(selection.anchorNode, subject.length);
-			
 			var $html = $(marked(subject));
 			
 			$parent.html($html);
-			if ($html.is('h1, h2, h3, h4, h5, h6, blockquote, ul, ol, hr') && $parent.is('p')) $html.unwrap();
+			if ($html.is('h1, h2, h3, h4, h5, h6, blockquote, ul, ol, hr, p') && $parent.is('p')) $html.unwrap();
+			
+			selection.refresh(true);
 			
 			var carret = rangy.createRange();
-			if (subject.length === initialPosition){
-				//carret was at the end, reposition it there
-				var $node = $html;
-				
-				while ($node.children().length > 0){
-					$node = $node.children().last();
-				}
-				var node = $node[0];
-				
-				node = node.childNodes[node.childNodes.length-1];
-				
-				carret.setStart(node, node.textContent.length);
-				carret.setEnd(node, node.textContent.length);
-				
-				selection.removeAllRanges();
-				selection.addRange(carret);
-			}
+			var $node = $html;
 			
-//			selection.removeAllRanges();
-//			selection.addRange(range);
-//			
-//			document.execCommand('insertHTML', false, html);
-//			
-//			selection.refresh(true);
-//			
-//			var carret = rangy.createRange();
-//			
-//			if (subject.length === initialPosition){
-//				//carret was at the end, reposition it there
-//				var nextNode = selection.anchorNode;
-//				
-//				carret.setStart(nextNode, nextNode.textContent.length);
-//				carret.setEnd(nextNode, nextNode.textContent.length);
-//			}
-//			else{
-//				var nextNode = selection.anchorNode;
-//				//carret was somewhere else, try to reposition it hwere it was
-//				carret.setStart(nextNode);
-//				carret.setEnd(nextNode);
-//			}
-//			
-//			selection.removeAllRanges();
-//			selection.addRange(carret);
+			while ($node.children().length > 0){
+				$node = $node.children().last();
+			}
+			var node = $node[0];
+			
+			node = node.childNodes[node.childNodes.length-1];
+			
+			carret.setStart(node, node.textContent.length);
+			carret.setEnd(node, node.textContent.length);
+			
+			selection.removeAllRanges();
+			selection.addRange(carret);
 		}
 	};
 	
