@@ -7,6 +7,7 @@
 		this.selecting = false;
 		this.$element = $(element).attr('contentEditable', true)
 								  .on('mousedown', $.proxy(this.selectionStart, this))
+								  .on('keydown', $.proxy(this.keydown, this))
 								  .on('keyup', $.proxy(this.keyup, this));
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
@@ -32,8 +33,9 @@
 		}, this));
 		
 		this.mdOptions = {
-			gfm: false,
+			gfm: true,
 			smartypants: true,
+			smartLists: true,
 		};
 		
 		var text = this.$element.html();
@@ -73,21 +75,34 @@
 		this.$toolbar.show();
 	};
 	
-	Compose.prototype.keyup = function(event){
-		//markdown convertion
+	Compose.prototype.keydown = function(event){
 		var selection = rangy.getSelection(),
 			subject = selection.anchorNode.wholeText || '';
+			
+		//prevent double spaces
+		if (event.which === 32 && subject[subject.length-1].match(/\s/)) event.preventDefault();
+	};
+	
+	Compose.prototype.keyup = function(event){
+		//markdown convertion
+		var selection = rangy.getSelection();
+		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
+		
+		var subject = $parent.html().replace(/&gt;/, '>')
+									.replace(/`<br( \/)?>/, '`\n')
+									.replace(/<br( \/)?>`/, '\n`');
 			
 		var triggers = [
 			/^#+\s.+/g,					//titles
 			/^>\s.+/g,					//quotes
+			/^`{3}\n.+\n`{3}/g,			//code blocks
 			/^(\*|\-|\+){1} [^*-]+/g,	//ul
 			/^1\. .+/g,					//ol
 			/^((\*|\-|_){1} ?){3,}/g,	//hr
-			/^\s{4}./g,					//code block
 			/(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g, //em
 			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
-			/\[.+\]\(.+( ".+")?\)/g,	//link
+			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
+			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url
 			/\.{3}./g,					//ellipsis
 			/--./g,						//em dash
 			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
@@ -108,16 +123,15 @@
 
 		if (convert){
 			var initialPosition = selection.focusOffset;
-			var $parent = $(selection.anchorNode.parentNode);
-			
-			var $html = $(marked($parent.html(), this.mdOptions));
+						
+			var $html = $(marked(subject.replace(/<br( \/)?>$/g, ''), this.mdOptions));
 			
 			$parent.html($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
 			
 			selection.refresh(true);
 			
-			//some tags you can't break out of, so we need to create
+			//some tags you can't break out of, so we need to create something
 			if ($html.is('blockquote, hr, pre')) $html.after($('<p>'));
 			
 			var carret = rangy.createRange(),
@@ -129,7 +143,7 @@
 			else {
 				//get the last node recursively
 				var $node = $html;
-				
+				console.log($html);
 				while ($node.children().length > 0){
 					$node = $node.children().last();
 				}
@@ -145,9 +159,9 @@
 			selection.addRange(carret);
 		}
 		
-		//escaping out of some tags creates a div instead of a p in chrome
+		//cross browser consistent breaking out of block tags
+		var $current = $(selection.anchorNode);
 		if (event.which === 13){
-			var $current = $(selection.anchorNode)
 			if ($current.is('div')){
 				var $p = $('<p>').appendTo($current).unwrap();
 				if ($p.prev().is('br')) $p.prev().remove();
