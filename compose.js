@@ -131,21 +131,18 @@
 			$parent.html($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
 			
-			selection.refresh(true);
-			
 			//reposition carret
-			var node;
-			
 			if ($html.is('hr')){
-				node = $html.next()[0];
+				this.positionCarret($html.next()[0]);
 			}
-			else {
+			else{
 				//get the last block node recursively
 				var $node = $html;
+				
 				while ($node.children('li, p, code').length > 0){
 					$node = $node.children().last();
 				}
-				node = $node[0].childNodes[$node[0].childNodes.length-1];
+				var node = $node[0].childNodes[$node[0].childNodes.length-1];
 				
 				//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
 				//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
@@ -165,9 +162,9 @@
 						this.positionCarret(node);
 					}, this));
 				}
+				
+				this.positionCarret(node);
 			}
-			
-			this.positionCarret(node);
 		}
 		
 		//cross browser consistent breaking out of block tags
