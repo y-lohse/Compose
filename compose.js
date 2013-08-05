@@ -88,10 +88,11 @@
 		var selection = rangy.getSelection();
 		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
 		
-		var subject = $parent.html().replace(/&gt;/, '>')
-									.replace(/`<br( \/)?>/, '`\n')
-									.replace(/<br( \/)?>`/, '\n`');
-			
+		var subject = $parent.html().replace(/^&gt;/, '>')			//needed for blockquotes
+									.replace(/&nbsp;$/, ' ')		//neded for... pretty much everything
+									.replace(/`<br( \/)?>/, '`\n')	//fenced code
+									.replace(/<br( \/)?>`/, '\n`');	//fenced code
+							
 		var triggers = [
 			/^#+\s.+/g,					//titles
 			/^>\s.+/g,					//quotes
