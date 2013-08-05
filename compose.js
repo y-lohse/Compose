@@ -124,16 +124,14 @@
 		if (convert){
 			var initialPosition = selection.focusOffset;
 						
-			var $html = $(marked(subject.replace(/<br( \/)?>$/g, ''), this.mdOptions));
+			var $html = $(marked(subject.replace(/<br( \/)?>$/g, ''), this.mdOptions));//remove trailing brs before conversion
 			
 			$parent.html($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
 			
 			selection.refresh(true);
 			
-			//some tags you can't break out of, so we need to create something
-			if ($html.is('blockquote, hr, pre')) $html.after($('<p>'));
-			
+			//reposition carret
 			var carret = rangy.createRange(),
 				node;
 			
@@ -143,7 +141,6 @@
 			else {
 				//get the last node recursively
 				var $node = $html;
-				console.log($html);
 				while ($node.children().length > 0){
 					$node = $node.children().last();
 				}
@@ -160,12 +157,38 @@
 		}
 		
 		//cross browser consistent breaking out of block tags
-		var $current = $(selection.anchorNode);
+		var $current = $(selection.anchorNode),
+			$p = $('<p>'),
+			brokeOut = false;
 		if (event.which === 13){
+			//in chrome when breaking out of lists, the new element is a div instead of a p.
 			if ($current.is('div')){
-				var $p = $('<p>').appendTo($current).unwrap();
+				brokeOut = true;
+				$p.appendTo($current).unwrap();
 				if ($p.prev().is('br')) $p.prev().remove();
-				
+			}
+			
+			//pressing enter inside a block quote creates new paragraphs, which is a good thing the first time, but a bad thing if that paragraph is left empty
+			if ($current.is('p') && 
+				$current.text() === '' && 
+				$current.parent().is('blockquote') && 
+				$current.prev().is('p') && 
+				$current.prev().text() === ''){
+				brokeOut = true;
+				$current.parent().after($p);
+				$current.add($current.prev()).remove();
+			}
+			
+			//pressing enter within pre+code blocks shoudnt create new pre+code blocks
+			if ($current.is('code') &&
+				$current.parent().text() === ''){
+				brokeOut = true;
+				$current.parent().after($p);
+				$current.parent().add().remove();
+			}
+			
+			//carret repositionning
+			if (brokeOut){
 				var carret = rangy.createRange();
 				carret.setStart($p[0]);
 				carret.setEnd($p[0]);
