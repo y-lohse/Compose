@@ -74,6 +74,7 @@
 	};
 	
 	Compose.prototype.keyup = function(event){
+		//markdown convertion
 		var selection = rangy.getSelection(),
 			subject = selection.anchorNode.wholeText || '';
 			
@@ -142,6 +143,23 @@
 			
 			selection.removeAllRanges();
 			selection.addRange(carret);
+		}
+		
+		//escaping out of some tags creates a div instead of a p in chrome
+		if (event.which === 13){
+			var $current = $(selection.anchorNode)
+			if ($current.is('div')){
+				var $p = $('<p>').appendTo($current).unwrap();
+				if ($p.prev().is('br')) $p.prev().remove();
+				
+				var carret = rangy.createRange();
+				carret.setStart($p[0]);
+				carret.setEnd($p[0]);
+				
+				selection.refresh(true);
+				selection.removeAllRanges();
+				selection.addRange(carret);
+			}
 		}
 	};
 	
