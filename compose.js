@@ -147,6 +147,31 @@
 					$node = $node.children().last();
 				}
 				node = $node[0].childNodes[$node[0].childNodes.length-1];
+				
+				//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
+				//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
+				if ($node.children().last().is('em')){
+					var $wrap = $('<span>').html('&nbsp;');
+					$node.html($node.html().trim());
+					$node.append($wrap);
+					node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
+					
+					this.$element.one('keyup', function(){
+						var text = $wrap.html().replace(/&nbsp;/, ' '),
+							$parentRef = $wrap.parent();
+						$wrap.remove();
+						$parentRef.html($parentRef.html()+text);
+						
+						var selection = rangy.getSelection(),
+							range = rangy.createRange(),
+							node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
+						range.setStart(node, node.textContent.length);
+						range.setEnd(node, node.textContent.length);
+						
+						selection.removeAllRanges();
+						selection.addRange(range);
+					});
+				}
 			}
 			
 			carret.setStart(node, node.textContent.length);
