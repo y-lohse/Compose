@@ -104,15 +104,26 @@
 			
 			selection.refresh(true);
 			
-			var carret = rangy.createRange();
-			var $node = $html;
+			//some tags you can't break out of, so we need to create
+			if ($html.is('blockquote, hr')) $html.after($('<p>'));
 			
-			while ($node.children().length > 0){
-				$node = $node.children().last();
+			var carret = rangy.createRange(),
+				node;
+			
+			if ($html.is('hr')){
+				node = $html.next()[0];
 			}
-			var node = $node[0];
-			
-			node = node.childNodes[node.childNodes.length-1];
+			else {
+				//get the last node recursively
+				var $node = $html;
+				
+				while ($node.children().length > 0){
+					$node = $node.children().last();
+				}
+				node = $node[0];
+				
+				node = node.childNodes[node.childNodes.length-1];
+			}
 			
 			carret.setStart(node, node.textContent.length);
 			carret.setEnd(node, node.textContent.length);
