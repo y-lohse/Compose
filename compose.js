@@ -134,8 +134,7 @@
 			selection.refresh(true);
 			
 			//reposition carret
-			var carret = rangy.createRange(),
-				node;
+			var node;
 			
 			if ($html.is('hr')){
 				node = $html.next()[0];
@@ -156,29 +155,19 @@
 					$node.append($wrap);
 					node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
 					
-					this.$element.one('keyup', function(){
+					this.$element.one('keyup', $.proxy(function(){
 						var text = $wrap.html().replace(/&nbsp;/, ' '),
 							$parentRef = $wrap.parent();
 						$wrap.remove();
 						$parentRef.html($parentRef.html()+text);
 						
-						var selection = rangy.getSelection(),
-							range = rangy.createRange(),
-							node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
-						range.setStart(node, node.textContent.length);
-						range.setEnd(node, node.textContent.length);
-						
-						selection.removeAllRanges();
-						selection.addRange(range);
-					});
+						var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
+						this.positionCarret(node);
+					}, this));
 				}
 			}
 			
-			carret.setStart(node, node.textContent.length);
-			carret.setEnd(node, node.textContent.length);
-			
-			selection.removeAllRanges();
-			selection.addRange(carret);
+			this.positionCarret(node);
 		}
 		
 		//cross browser consistent breaking out of block tags
@@ -214,16 +203,11 @@
 			
 			//carret repositionning
 			if (brokeOut){
-				var carret = rangy.createRange();
-				carret.setStart($p[0]);
-				carret.setEnd($p[0]);
-				
-				selection.refresh(true);
-				selection.removeAllRanges();
-				selection.addRange(carret);
+				this.positionCarret($p[0]);
 			}
 		}
 	};
+	
 	
 	Compose.prototype.addTools = function(tools){
 		tools = ($.isArray(tools)) ? tools : [tools];
@@ -234,6 +218,17 @@
 		}
 		
 		return this;
+	};
+	
+	Compose.prototype.positionCarret = function(node){
+		var selection = rangy.getSelection(),
+			range = rangy.createRange();
+			
+		range.setStart(node, node.textContent.length);
+		range.setEnd(node, node.textContent.length);
+		
+		selection.removeAllRanges();
+		selection.addRange(range);
 	};
 	
 	Compose.prototype.wrapRange = function(elem, range){
