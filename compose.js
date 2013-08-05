@@ -78,11 +78,12 @@
 			subject = selection.anchorNode.wholeText || '';
 			
 		var triggers = [
-			/^#+ .+/g,					//titles
-			/^> .+/g,					//quotes
+			/^#+\s.+/g,					//titles
+			/^>\s.+/g,					//quotes
 			/^(\*|\-|\+){1} [^*-]+/g,	//ul
 			/^1\. .+/g,					//ol
 			/^((\*|\-|_){1} ?){3,}/g,	//hr
+			/^\s{4}./g,					//code block
 			/(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g, //em
 			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
 			/\[.+\]\(.+( ".+")?\)./g,	//link
@@ -111,12 +112,12 @@
 			var $html = $(marked(subject, this.mdOptions));
 			
 			$parent.html($html);
-			if ($html.is('h1, h2, h3, h4, h5, h6, blockquote, ul, ol, hr, p') && $parent.is('p')) $html.unwrap();
+			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
 			
 			selection.refresh(true);
 			
 			//some tags you can't break out of, so we need to create
-			if ($html.is('blockquote, hr')) $html.after($('<p>'));
+			if ($html.is('blockquote, hr, pre')) $html.after($('<p>'));
 			
 			var carret = rangy.createRange(),
 				node;
