@@ -117,7 +117,8 @@
 			
 		var convert = false;
 		for (var i = 0, l = triggers.length; i < l; i++){
-			if (subject.match(triggers[i])){
+			if (subject.replace(/<br( \/)?>$/g, '').match(triggers[i])){
+				subject = subject.replace(/<br( \/)?>$/g, '');//remove trailing brs before conversion
 				convert = true;
 				break;
 			}
@@ -125,8 +126,8 @@
 
 		if (convert){
 			var initialPosition = selection.focusOffset;
-						
-			var $html = $(marked(subject.replace(/<br( \/)?>$/g, ''), this.mdOptions));//remove trailing brs before conversion
+			
+			var $html = $(marked(subject, this.mdOptions));
 			
 			$parent.html($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
