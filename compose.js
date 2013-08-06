@@ -1,14 +1,21 @@
 (function($){
 	'use strict';
 	
-	var Compose = function(element){
-		this.selection = null;
+	var Compose = function(element, options){
+		options = options || Compose.defaults;
 		
+		this.markdown = options.markdown;
+		
+		this.selection = null;
 		this.selecting = false;
+		
 		this.$element = $(element).attr('contentEditable', true)
 								  .on('mousedown', $.proxy(this.selectionStart, this))
 								  .on('keydown', $.proxy(this.keydown, this))
 								  .on('keyup', $.proxy(this.keyup, this));
+								  
+		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directy through the Compose object
+								  
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
 						.addClass('compose-toolbar')
@@ -32,14 +39,12 @@
 			this.selecting = false;
 		}, this));
 		
-		this.mdOptions = {
-			gfm: true,
-			smartypants: true,
-			smartLists: true,
-		};
-		
-		var text = this.$element.html();
-		this.$element.html(marked(text.replace(/	/g, ''), this.mdOptions));
+		//init markdown parser if there is one
+		if (this.markdown) this.markdown = new this.markdown(this);
+	};
+	
+	Compose.defaults = {
+		markdown: false,
 	};
 	
 	Compose.prototype.selectionStart = function(event){
@@ -84,82 +89,11 @@
 	};
 	
 	Compose.prototype.keyup = function(event){
-		//markdown convertion
-		var selection = rangy.getSelection();
-		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
-		
-		//get the content we'll test, but rremove any special chars that will fuck up the regex
-		var subject = $parent.html().replace(/^&gt;/, '>')			//needed for blockquotes
-									.replace(/&nbsp;$/, ' ')		//neded for... pretty much everything
-									.replace(/`<br( \/)?>/, '`\n')	//fenced code
-									.replace(/<br( \/)?>`/, '\n`');	//fenced code
-							
-		var triggers = [
-			/^#+\s.+/g,					//titles
-			/^>\s.+/g,					//quotes
-			/^`{3}\n.+\n`{3}/g,			//code blocks
-			/^(\*|\-|\+){1} [^*-]+/g,	//ul
-			/^1\. .+/g,					//ol
-			/^((\*|\-|_){1} ?){3,}/g,	//hr
-			/(\*{1}.+\*{1})|(_{1}.+\_{1})/g, //em
-			/(\*{2}.+\*{2})|(_{2}.+_{2})/g, //strong
-			/`[^`\n]+`/g,				//inline code
-			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
-//			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url, disabled because the trigger fials with trailing spaces
-			/\.{3}./g,					//ellipsis
-			/--./g,						//em dash
-			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
-			/(^|[-\u2014/(\[{\u2018\s])"/,	//opening doubles
-			/'/g,						//closing single
-			/"/g,						//closing doubles
-		];
-		var emTriggerIndex = 6;
-			
-		var convert = false;
-		for (var i = 0, l = triggers.length; i < l; i++){
-			if (subject.replace(/<br( \/)?>$/g, '').match(triggers[i])){
-				//em may collide with strong triggers, this is a workaround. negative lookbehind woul be required to do without this.
-				if (i === emTriggerIndex && !subject.split('').reverse().join('').match(/\*[^\*]+\*(?!\*)/g)){
-					continue;
-				}
-				
-				//remove trailing brs before conversion
-				//we also need to reinject the trailing nbsp
-				subject = subject.replace(/<br( \/)?>$/g, '').replace(/ $/, '&nbsp;');
-				convert = true;
-				break;
-			}
-		}
-
-		if (convert){
-			var initialPosition = selection.focusOffset;
-			
-			var $html = $(marked(subject, this.mdOptions));
-			
-			$parent.empty().append($html);
-			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
-			
-			//reposition carret
-			if ($html.is('hr')){
-				this.positionCarret($html.next()[0]);
-			}
-			else{
-				//get the last block node recursively
-				var $node = $html;
-				
-				while ($node.children('li, p, code').length > 0){
-					$node = $node.children().last();
-				}
-				var node = $node[0].childNodes[$node[0].childNodes.length-1];
-				
-				this.positionCarret(node);
-			}
-		}
-		
 		//cross browser consistent breaking out of block tags
-		var $current = $(selection.anchorNode),
+		var $current = $(rangy.getSelection().anchorNode),
 			$p = $('<p>'),
 			brokeOut = false;
+		
 		if (event.which === 13){
 			//in chrome when breaking out of lists, the new element is a div instead of a p.
 			if ($current.is('div')){
@@ -193,30 +127,30 @@
 			}
 		}
 		else if (event.which === 32){
-			//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
-			//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
+			//breaking out of inline tags
+			//this next bit of shitty code is because of a long standing webkit bug that won't let you put the caret inside an empty node
+			//so when the caret is inside an inline tag and the users presses space, we create a new text node with an nbsp in it, and place the caret in there.
 			if ($current.parent().is('em, strong, a, code')){
-					var $wrap = $('<span>').html('&nbsp;'),
-						$inline = $current.parent();
+				var $wrap = $('<span>').html('&nbsp;'),
+					$inline = $current.parent();
+				
+				$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
+				$inline.after($wrap);
+				var node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
+				this.positionCarret(node);
+				
+				this.$element.one('keyup', $.proxy(function(){
+					var text = $wrap.html().replace(/&nbsp;/, ' '),
+						$parentRef = $wrap.parent();
+					$wrap.remove();
+					$parentRef.html($parentRef.html()+text);
 					
-					$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
-					$inline.after($wrap);
-					var node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
+					var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
 					this.positionCarret(node);
-					
-					this.$element.one('keyup', $.proxy(function(){
-						var text = $wrap.html().replace(/&nbsp;/, ' '),
-							$parentRef = $wrap.parent();
-						$wrap.remove();
-						$parentRef.html($parentRef.html()+text);
-						
-						var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
-						this.positionCarret(node);
-					}, this));
+				}, this));
 			}
 		}
 	};
-	
 	
 	Compose.prototype.addTools = function(tools){
 		tools = ($.isArray(tools)) ? tools : [tools];

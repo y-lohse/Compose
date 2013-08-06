@@ -47,10 +47,13 @@
 		<script src="rangy.js"></script>
 		<script src="marked.js"></script>
 		<script src="compose.js"></script>
+		<script src="compose-md.js"></script>
 		<script src="compose-tools.js"></script>
 		<script>
 			$(function(){
-				var compose = new Compose('#composearea');
+				var compose = new Compose('#composearea', {
+					markdown: Compose.ComposeMarkdown
+				});
 				compose.addTools(ComposeTools);
 			});
 		</script>
