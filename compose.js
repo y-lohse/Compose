@@ -88,6 +88,7 @@
 		var selection = rangy.getSelection();
 		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
 		
+		//get the content we'll test, but rremove any special chars that will fuck up the regex
 		var subject = $parent.html().replace(/^&gt;/, '>')			//needed for blockquotes
 									.replace(/&nbsp;$/, ' ')		//neded for... pretty much everything
 									.replace(/`<br( \/)?>/, '`\n')	//fenced code
@@ -118,14 +119,15 @@
 		var convert = false;
 		for (var i = 0, l = triggers.length; i < l; i++){
 			if (subject.replace(/<br( \/)?>$/g, '').match(triggers[i])){
-				subject = subject.replace(/<br( \/)?>$/g, '');//remove trailing brs before conversion
+				//remove trailing brs before conversion
+				//we also need to reinject the trailing nbsp
+				subject = subject.replace(/<br( \/)?>$/g, '').replace(/ $/, '&nbsp;');
 				convert = true;
 				break;
 			}
 		}
 
 		if (convert){
-			console.log('convert');
 			var initialPosition = selection.focusOffset;
 			
 			var $html = $(marked(subject, this.mdOptions));
@@ -190,11 +192,9 @@
 			//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
 			//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
 			if ($current.parent().is('em, strong, a, code')){
-					console.log('space stuff');
 					var $wrap = $('<span>').html('&nbsp;'),
 						$inline = $current.parent();
 					
-					console.log($inline.html());
 					$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
 					$inline.after($wrap);
 					var node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
