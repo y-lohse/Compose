@@ -147,7 +147,7 @@
 				
 				//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
 				//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
-				if ($node.children().last().is('em, strong, a')){
+				if ($node.children().last().is('em, strong, a') && node.wholeText.match(/^\s$/)){
 					var $wrap = $('<span>').html('&nbsp;');
 					$node.html($node.html().trim());
 					$node.append($wrap);
