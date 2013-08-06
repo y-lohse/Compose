@@ -101,11 +101,11 @@
 			/^(\*|\-|\+){1} [^*-]+/g,	//ul
 			/^1\. .+/g,					//ol
 			/^((\*|\-|_){1} ?){3,}/g,	//hr
-			/(\*(?!(\*| ))[^\*]+\*)|(_(?!(_| ))[^_]+_)/g, //em
-			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
+			/(\*{1}.+\*{1})|(_{1}.+\_{1})/g, //em
+			/(\*{2}.+\*{2})|(_{2}.+_{2})/g, //strong
 			/`[^`\n]+`/g,				//inline code
 			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
-			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url
+//			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url, disabled because the trigger fials with trailing spaces
 			/\.{3}./g,					//ellipsis
 			/--./g,						//em dash
 			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
@@ -113,12 +113,16 @@
 			/'/g,						//closing single
 			/"/g,						//closing doubles
 		];
-		//the em one is a bit crazy, here's what it does :
-		//match a * not followed by (a * or a space) but followed by at least one thing which is not a * (but can be a space) followed by another *, itself followed by anything except a *. oh, and the same with _ instead of *.
+		var emTriggerIndex = 6;
 			
 		var convert = false;
 		for (var i = 0, l = triggers.length; i < l; i++){
 			if (subject.replace(/<br( \/)?>$/g, '').match(triggers[i])){
+				//em may collide with strong triggers, this is a workaround. negative lookbehind woul be required to do without this.
+				if (i === emTriggerIndex && !subject.split('').reverse().join('').match(/\*[^\*]+\*(?!\*)/g)){
+					continue;
+				}
+				
 				//remove trailing brs before conversion
 				//we also need to reinject the trailing nbsp
 				subject = subject.replace(/<br( \/)?>$/g, '').replace(/ $/, '&nbsp;');
