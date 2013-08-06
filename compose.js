@@ -100,10 +100,10 @@
 			/^(\*|\-|\+){1} [^*-]+/g,	//ul
 			/^1\. .+/g,					//ol
 			/^((\*|\-|_){1} ?){3,}/g,	//hr
-			/(\*(?!(\*| ))[^\*]+\*[^\*]{1})|(_(?!(_| ))[^_]+_[^_]{1})/g, //em
+			/(\*(?!(\*| ))[^\*]+\*)|(_(?!(_| ))[^_]+_)/g, //em
 			/(\*{2}.+\*{2}.)|(_{2}.+_{2}.)/g, //strong
-			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
 			/`[^`\n]+`/g,				//inline code
+			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
 			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url
 			/\.{3}./g,					//ellipsis
 			/--./g,						//em dash
@@ -125,11 +125,12 @@
 		}
 
 		if (convert){
+			console.log('convert');
 			var initialPosition = selection.focusOffset;
 			
 			var $html = $(marked(subject, this.mdOptions));
 			
-			$parent.html($html);
+			$parent.empty().append($html);
 			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
 			
 			//reposition carret
@@ -144,25 +145,6 @@
 					$node = $node.children().last();
 				}
 				var node = $node[0].childNodes[$node[0].childNodes.length-1];
-				
-				//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
-				//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
-				if ($node.children().last().is('em, strong, a') && node.wholeText.match(/^\s$/)){
-					var $wrap = $('<span>').html('&nbsp;');
-					$node.html($node.html().trim());
-					$node.append($wrap);
-					node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
-					
-					this.$element.one('keyup', $.proxy(function(){
-						var text = $wrap.html().replace(/&nbsp;/, ' '),
-							$parentRef = $wrap.parent();
-						$wrap.remove();
-						$parentRef.html($parentRef.html()+text);
-						
-						var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
-						this.positionCarret(node);
-					}, this));
-				}
 				
 				this.positionCarret(node);
 			}
@@ -204,6 +186,31 @@
 				this.positionCarret($p[0]);
 			}
 		}
+		else if (event.which === 32){
+			//this next bit of shitty code is because of a long standing webkit bug thatwon't let you put the carret inside an empty node
+			//the workaround here is to create &n element with just a nbsp inside which we remove wehn the next caracter is inserted
+			if ($current.parent().is('em, strong, a, code')){
+					console.log('space stuff');
+					var $wrap = $('<span>').html('&nbsp;'),
+						$inline = $current.parent();
+					
+					console.log($inline.html());
+					$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
+					$inline.after($wrap);
+					var node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
+					this.positionCarret(node);
+					
+					this.$element.one('keyup', $.proxy(function(){
+						var text = $wrap.html().replace(/&nbsp;/, ' '),
+							$parentRef = $wrap.parent();
+						$wrap.remove();
+						$parentRef.html($parentRef.html()+text);
+						
+						var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
+						this.positionCarret(node);
+					}, this));
+			}
+		}
 	};
 	
 	
@@ -220,10 +227,11 @@
 	
 	Compose.prototype.positionCarret = function(node){
 		var selection = rangy.getSelection(),
-			range = rangy.createRange();
+			range = rangy.createRange(),
+			offset = (node.nodeType === 3) ? node.textContent.length : 1;
 			
-		range.setStart(node, node.textContent.length);
-		range.setEnd(node, node.textContent.length);
+		range.setStart(node, offset);
+		range.setEnd(node, offset);
 		
 		selection.removeAllRanges();
 		selection.addRange(range);
