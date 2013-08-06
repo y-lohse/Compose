@@ -9,10 +9,7 @@
 		this.selection = null;
 		this.selecting = false;
 		
-		this.$element = $(element).attr('contentEditable', true)
-								  .on('mousedown', $.proxy(this.selectionStart, this))
-								  .on('keydown', $.proxy(this.keydown, this))
-								  .on('keyup', $.proxy(this.keyup, this));
+		this.$element = $(element).attr('contentEditable', true);
 								  
 		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directy through the Compose object
 								  
@@ -41,6 +38,10 @@
 		
 		//init markdown parser if there is one
 		if (this.markdown) this.markdown = new this.markdown(this);
+		
+		this.$element.on('mousedown', $.proxy(this.selectionStart, this))
+					  .on('keydown', $.proxy(this.keydown, this))
+					  .on('keyup', $.proxy(this.keyup, this));
 	};
 	
 	Compose.defaults = {
@@ -90,11 +91,12 @@
 	
 	Compose.prototype.keyup = function(event){
 		//cross browser consistent breaking out of block tags
-		var $current = $(rangy.getSelection().anchorNode),
-			$p = $('<p>'),
-			brokeOut = false;
+		var $current = $(rangy.getSelection().anchorNode);
 		
 		if (event.which === 13){
+			var $p = $('<p>').html('&nbsp;'),
+				brokeOut = false;
+			
 			//in chrome when breaking out of lists, the new element is a div instead of a p.
 			if ($current.is('div')){
 				brokeOut = true;

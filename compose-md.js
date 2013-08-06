@@ -4,7 +4,7 @@
 	var ComposeMarkdown = function(composeInstance){
 		this.composer = composeInstance;
 		
-		this.composer.on('keydown', $.proxy(this.keydown, this.composer));
+		this.composer.on('keyup', $.proxy(this.keyup, this.composer));
 		
 		var source = this.composer.$element.html();
 		this.composer.$element.html(ComposeMarkdown.parse(source.replace(/	/g, '')));
@@ -20,8 +20,9 @@
 		return marked(str, ComposeMarkdown.markedOptions);
 	};
 	
-	ComposeMarkdown.prototype.keydown = function(event){
+	ComposeMarkdown.prototype.keyup = function(event){
 		var selection = rangy.getSelection();
+		var node = selection.anchorNode;
 		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
 		
 		//get the content we'll test, but rremove any special chars that will fuck up the regex
