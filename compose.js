@@ -133,21 +133,17 @@
 			//this next bit of shitty code is because of a long standing webkit bug that won't let you put the caret inside an empty node
 			//so when the caret is inside an inline tag and the users presses space, we create a new text node with an nbsp in it, and place the caret in there.
 			if ($current.parent().is('em, strong, a, code')){
-				var $wrap = $('<span>').html('&nbsp;'),
+				var $wrap = $(document.createTextNode('a')).text('&nbsp;'),
 					$inline = $current.parent();
 				
 				$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
-				$inline.after($wrap);
-				var node = $wrap[0].childNodes[$wrap[0].childNodes.length-1];
+				$inline.after(document.createTextNode('\u00a0'));
+				
+				var node = $inline[0].nextSibling;
 				this.positionCarret(node);
 				
 				this.$element.one('keyup', $.proxy(function(){
-					var text = $wrap.html().replace(/&nbsp;/, ' '),
-						$parentRef = $wrap.parent();
-					$wrap.remove();
-					$parentRef.html($parentRef.html()+text);
-					
-					var node = $parentRef[0].childNodes[$parentRef[0].childNodes.length-1];
+					node.textContent = node.textContent.replace('\u00a0', ' ');
 					this.positionCarret(node);
 				}, this));
 			}
@@ -166,11 +162,9 @@
 	};
 	
 	Compose.prototype.positionCarret = function(node, offset){
-		console.log(node);
 		var selection = rangy.getSelection(),
 			range = rangy.createRange(),
 			offset = offset || ((node.nodeType === 3) ? node.textContent.length : 1);
-		console.log(offset);
 			
 		range.setStart(node, offset);
 		range.setEnd(node, offset);
