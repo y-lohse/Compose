@@ -20,6 +20,25 @@
 		return marked(str, ComposeMarkdown.markedOptions);
 	};
 	
+	//recursively finds childnode until the given ofset is found. Returns both the end node and the remaining osset
+	ComposeMarkdown.matchOffset = function($baseNode, target, offset){
+		for (var i = 0, l = $baseNode[0].childNodes.length; i < l; i++){
+			var $node = $($baseNode[0].childNodes[i]);
+			
+			if ($node.text().length+offset >= target){
+				if ($node[0].childNodes && $node[0].childNodes.length > 0) return ComposeMarkdown.matchOffset($node, target, offset);
+				else{
+					return {
+						node: $node[0],
+						offset: target-offset
+					};
+				}
+				break;
+			}
+			else offset += $node.text().length;
+		}
+	};
+	
 	ComposeMarkdown.prototype.keyup = function(event){
 		var selection = rangy.getSelection();
 		var node = selection.anchorNode;
@@ -69,8 +88,11 @@
 		}
 
 		if (convert){
-			var initialPosition = selection.focusOffset;
-			
+			var plainSubject = $('<div>').html(subject).text();
+			var actualOffset = plainSubject.indexOf(selection.anchorNode.wholeText)+selection.focusOffset;
+			var parsedChunk = $(ComposeMarkdown.parse(plainSubject.substring(0, actualOffset)));
+			var destination = actualOffset-(actualOffset-parsedChunk.text().length);
+					
 			var $html = $(ComposeMarkdown.parse(subject));
 			
 			$parent.empty().append($html);
@@ -79,6 +101,11 @@
 			//reposition carret
 			if ($html.is('hr')){
 				this.positionCarret($html.next()[0]);
+			}
+			else if (selection.focusOffset < selection.anchorNode.wholeText.length){
+				//caret wesn't at th end, try to reposition it where it used to be
+				var newOffset = ComposeMarkdown.matchOffset($html, destination, 0);
+				this.positionCarret(newOffset.node, newOffset.offset);
 			}
 			else{
 				//get the last block node recursively

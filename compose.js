@@ -165,10 +165,12 @@
 		return this;
 	};
 	
-	Compose.prototype.positionCarret = function(node){
+	Compose.prototype.positionCarret = function(node, offset){
+		console.log(node);
 		var selection = rangy.getSelection(),
 			range = rangy.createRange(),
-			offset = (node.nodeType === 3) ? node.textContent.length : 1;
+			offset = offset || ((node.nodeType === 3) ? node.textContent.length : 1);
+		console.log(offset);
 			
 		range.setStart(node, offset);
 		range.setEnd(node, offset);
