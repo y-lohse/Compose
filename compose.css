@@ -7,9 +7,12 @@
 }
 .compose-toolbar .compose-tool{
 	display: inline-block;
-	width: 20px;
+	min-width: 20px;
 	padding: 8px 4px;
 	color: #fff;
 	text-align:: center;
 	cursor: pointer;
+}
+.compose-toolbar .compose-tool.active{
+	color: #3ebf38;
 }

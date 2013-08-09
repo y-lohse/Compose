@@ -4,6 +4,7 @@
 	var Compose = function(element, options){
 		options = options || Compose.defaults;
 		
+		this.tools = [];
 		this.markdown = options.markdown;
 		
 		this.$element = $(element).attr('contentEditable', true);					  
@@ -54,6 +55,13 @@
 		var $positionElem = $('<span>'),
 			range = selection.getRangeAt(0),
 			clone = range.cloneRange();
+			
+		var $xpath = $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
+			
+		for (var i = 0, l = this.tools.length; i < l; i++){
+			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass('active');
+			else $(this.tools[i].element).removeClass('active');
+		}
 			
 		//check if range is backwards
 		range.collapse(true);
@@ -166,8 +174,11 @@
 		tools = ($.isArray(tools)) ? tools : [tools];
 		
 		for (var i = 0, l = tools.length; i < l; i++){
-			this.$toolbar.append(tools[i]);
-			tools[i].trigger('compose-init', this);
+			if (!$.isFunction(tools[i].init)) continue;
+			
+			$.proxy(tools[i].init, tools[i], this)();
+			this.tools.push(tools[i]);
+			this.$toolbar.append(tools[i].element);
 		}
 		
 		return this;
@@ -185,7 +196,7 @@
 		selection.addRange(range);
 	};
 	
-	Compose.prototype.wrapRange = function(elem, range){
+	Compose.prototype.wrapSelection = function(elem, range){
 		if (range){
 			var sel = Compose.Range.getSelection();
 			sel.removeAllRanges();
