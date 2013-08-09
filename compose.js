@@ -50,12 +50,107 @@
 		return $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
 	}
 	
+	var selectionIsBackwards = function(sel) {
+		var backwards = false;
+		if (sel.anchorNode) {
+			backwards = (comparePoints(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset) == 1);
+		}
+		return backwards;
+	};
+	
+	function getClosestAncestorIn(node, ancestor, selfIsAncestor) {
+        var p, n = selfIsAncestor ? node : node.parentNode;
+        while (n) {
+            p = n.parentNode;
+            if (p === ancestor) {
+                return n;
+            }
+            n = p;
+        }
+        return null;
+    }
+    
+    function getNodeIndex(node) {
+        var i = 0;
+        while( (node = node.previousSibling) ) {
+            i++;
+        }
+        return i;
+    }
+    
+    function getCommonAncestor(node1, node2) {
+        var ancestors = [], n;
+        for (n = node1; n; n = n.parentNode) {
+            ancestors.push(n);
+        }
+
+        for (n = node2; n; n = n.parentNode) {
+            if (arrayContains(ancestors, n)) {
+                return n;
+            }
+        }
+
+        return null;
+    }
+    
+    var arrayContains = function(arr, val) {
+		var i = arr.length;
+		while (i--) {
+			if (arr[i] === val) {
+				return true;
+			}
+		}
+		return false;
+	};
+	
+	function comparePoints(nodeA, offsetA, nodeB, offsetB) {
+        // See http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html#Level-2-Range-Comparing
+        var nodeC, root, childA, childB, n;
+        if (nodeA == nodeB) {
+
+            // Case 1: nodes are the same
+            return offsetA === offsetB ? 0 : (offsetA < offsetB) ? -1 : 1;
+        } else if ( (nodeC = getClosestAncestorIn(nodeB, nodeA, true)) ) {
+
+            // Case 2: node C (container B or an ancestor) is a child node of A
+            return offsetA <= getNodeIndex(nodeC) ? -1 : 1;
+        } else if ( (nodeC = getClosestAncestorIn(nodeA, nodeB, true)) ) {
+
+            // Case 3: node C (container A or an ancestor) is a child node of B
+            return getNodeIndex(nodeC) < offsetB  ? -1 : 1;
+        } else {
+
+            // Case 4: containers are siblings or descendants of siblings
+            root = getCommonAncestor(nodeA, nodeB);
+            childA = (nodeA === root) ? root : getClosestAncestorIn(nodeA, root, true);
+            childB = (nodeB === root) ? root : getClosestAncestorIn(nodeB, root, true);
+
+            if (childA === childB) {
+                // This shouldn't be possible
+
+                throw new Error("comparePoints got to case 4 and childA and childB are the same!");
+            } else {
+                n = root.firstChild;
+                while (n) {
+                    if (n === childA) {
+                        return -1;
+                    } else if (n === childB) {
+                        return 1;
+                    }
+                    n = n.nextSibling;
+                }
+                throw new Error("Should not be here!");
+            }
+        }
+    }
+	
 	Compose.prototype.showTools = function(){
 		var selection = Compose.Range.getSelection();
 		var $positionElem = $('<span>'),
 			range = selection.getRangeAt(0),
 			clone = range.cloneRange();
 			
+		//check if the tool match the current selection
 		var $xpath = $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
 			
 		for (var i = 0, l = this.tools.length; i < l; i++){
@@ -64,8 +159,7 @@
 		}
 			
 		//check if range is backwards
-		range.collapse(true);
-		var backwards = (range.comparePoint(selection.focusNode, selection.focusOffset)) != 1;
+		var backwards = selectionIsBackwards(selection);
 			
 		//compute tools positions
 		range.insertNode($positionElem[0]);
