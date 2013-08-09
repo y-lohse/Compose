@@ -1,4 +1,4 @@
-(function($){
+(function($, document, window){
 	'use strict';
 	
 	var Compose = function(element, options){
@@ -32,14 +32,25 @@
 		markdown: false,
 	};
 	
+	Compose.Range = {
+		window: window,
+		document: document,
+		getSelection: function(){
+			return this.window.getSelection();
+		},
+		createRange: function(){
+			return this.document.createRange();
+		}
+	};
+	
 	Compose.prototype.isSelectionInElement = function(){
 		//@TODO : maybe checking with the common ancestor stuff would be better
-		var selection = rangy.getSelection();
+		var selection = Compose.Range.getSelection();
 		return $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
 	}
 	
 	Compose.prototype.showTools = function(){
-		var selection = window.getSelection();
+		var selection = Compose.Range.getSelection();
 		var $positionElem = $('<span>'),
 			range = selection.getRangeAt(0),
 			clone = range.cloneRange();
@@ -80,7 +91,7 @@
 	};
 	
 	Compose.prototype.keydown = function(event){
-		var subject = rangy.getSelection().anchorNode.wholeText || '';
+		var subject = Compose.Range.getSelection().anchorNode.wholeText || '';
 		
 		//prevent double spaces
 		if (event.which === 32 && subject[subject.length-1].match(/\s/)) event.preventDefault();
@@ -91,7 +102,7 @@
 		else this.$toolbar.hide();
 		
 		//cross browser consistent breaking out of block tags
-		var $current = $(rangy.getSelection().anchorNode);
+		var $current = $(Compose.Range.getSelection().anchorNode);
 		
 		if (event.which === 13){
 			var $p = $('<p>').html('&nbsp;'),
@@ -163,8 +174,8 @@
 	};
 	
 	Compose.prototype.positionCarret = function(node, offset){
-		var selection = rangy.getSelection(),
-			range = rangy.createRange(),
+		var selection = Compose.Range.getSelection(),
+			range = Compose.Range.createRange(),
 			offset = offset || ((node.nodeType === 3) ? node.textContent.length : 1);
 			
 		range.setStart(node, offset);
@@ -176,12 +187,12 @@
 	
 	Compose.prototype.wrapRange = function(elem, range){
 		if (range){
-			var sel = rangy.getSelection();
+			var sel = Compose.Range.getSelection();
 			sel.removeAllRanges();
 			sel.addRange(range);
 		}
 		else{
-			range = rangy.getSelection().getRangeAt(0);
+			range = Compose.Range.getSelection().getRangeAt(0);
 		}
 		elem = $(elem).text(range.toString());
 		
@@ -191,4 +202,4 @@
 	};
 	
 	window['Compose'] = Compose;
-})(window.jQuery);
+})(window.jQuery, document, window);

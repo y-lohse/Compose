@@ -40,7 +40,7 @@
 	};
 	
 	ComposeMarkdown.prototype.keyup = function(event){
-		var selection = rangy.getSelection();
+		var selection = Compose.Range.getSelection();
 		var node = selection.anchorNode;
 		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
 		
@@ -89,7 +89,7 @@
 
 		if (convert){
 			var plainSubject = $('<div>').html(subject).text();
-			var actualOffset = plainSubject.indexOf(selection.anchorNode.wholeText)+selection.focusOffset;
+			var actualOffset = plainSubject.indexOf(selection.anchorNode.data)+selection.focusOffset;
 			var parsedChunk = $(ComposeMarkdown.parse(plainSubject.substring(0, actualOffset)));
 			var destination = actualOffset-(actualOffset-parsedChunk.text().length);
 					
@@ -102,7 +102,7 @@
 			if ($html.is('hr')){
 				this.positionCarret($html.next()[0]);
 			}
-			else if (selection.focusOffset < selection.anchorNode.wholeText.length){
+			else if (selection.focusOffset < selection.anchorNode.innerText.length){
 				//caret wesn't at th end, try to reposition it where it used to be
 				var newOffset = ComposeMarkdown.matchOffset($html, destination, 0);
 				this.positionCarret(newOffset.node, newOffset.offset);
