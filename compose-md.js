@@ -62,8 +62,8 @@
 			/`[^`\n]+`/g,				//inline code
 			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
 //			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url, disabled because the trigger fials with trailing spaces
-			/\.{3}./g,					//ellipsis
-			/--./g,						//em dash
+			/\.{3}/g,					//ellipsis
+			/--[^-]/g,						//em dash
 			/(^|[-\u2014/(\[{"\s])'/,	//opening singles
 			/(^|[-\u2014/(\[{\u2018\s])"/,	//opening doubles
 			/'/g,						//closing single
@@ -100,7 +100,13 @@
 			
 			//reposition carret
 			if ($html.is('hr')){
-				this.positionCarret($html.next()[0]);
+				if ($html.next().length) this.positionCarret($html.next()[0], 0);
+				else{
+					//last element, append a new p
+					var $p = $('<p>');
+					$html.after($p);
+					this.positionCarret($p[0], 0);
+				}
 			}
 			else if (selection.focusOffset < selection.anchorNode.innerText.length){
 				//caret wesn't at th end, try to reposition it where it used to be

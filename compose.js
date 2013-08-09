@@ -176,7 +176,7 @@
 	Compose.prototype.positionCarret = function(node, offset){
 		var selection = Compose.Range.getSelection(),
 			range = Compose.Range.createRange(),
-			offset = offset || ((node.nodeType === 3) ? node.textContent.length : 1);
+			offset = ($.isNumeric(offset)) ? offset : ((node.nodeType === 3) ? node.textContent.length : 1);
 			
 		range.setStart(node, offset);
 		range.setEnd(node, offset);
