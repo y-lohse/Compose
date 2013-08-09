@@ -65,10 +65,21 @@
 			}
 		}, this), 0);
 		
+		this.showTools();
+	};
+	
+	Compose.prototype.showTools = function(){
+		var selection = window.getSelection();
 		var $positionElem = $('<span>'),
 			range = selection.getRangeAt(0),
 			clone = range.cloneRange();
-		(range.nativeRange.insertNode) ? range.nativeRange.insertNode($positionElem[0]) : range.insertNode($positionElem[0]);
+			
+		//check if range is backwards
+		range.collapse(true);
+		var backwards = (range.comparePoint(selection.focusNode, selection.focusOffset)) != 1;
+			
+		//compute tools positions
+		range.insertNode($positionElem[0]);
 		var position = $positionElem.offset();
 		//@TODO : check for colision with browser boundaries
 		this.$toolbar.css({
@@ -76,22 +87,39 @@
 			left: position.left,
 		});
 		$positionElem.remove();
-		selection.removeAllRanges();
-		selection.addRange(clone);
+		
+		//recreate selection
+		if (backwards){
+			clone.collapse(false);
+			selection.removeAllRanges();
+			selection.addRange(clone);
+			selection.extend(range.startContainer, range.startOffset);
+		}
+		else {
+			selection.removeAllRanges();
+			selection.addRange(clone);
+		}
+		
+		//actually show tools
 		this.$toolbar.show();
-	};
+	}
 	
 	Compose.prototype.keydown = function(event){
 		var selection = rangy.getSelection(),
 			subject = selection.anchorNode.wholeText || '';
-			
+		
 		//prevent double spaces
 		if (event.which === 32 && subject[subject.length-1].match(/\s/)) event.preventDefault();
 	};
 	
 	Compose.prototype.keyup = function(event){
+		var selection = rangy.getSelection();
+		var contained = $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
+		if (contained) this.showTools();
+		else this.$toolbar.hide();
+		
 		//cross browser consistent breaking out of block tags
-		var $current = $(rangy.getSelection().anchorNode);
+		var $current = $(selection.anchorNode);
 		
 		if (event.which === 13){
 			var $p = $('<p>').html('&nbsp;'),
