@@ -96,6 +96,10 @@
 	Compose.prototype.mouseup = function(event){
 		if (this.isSelectionInElement()) this.showTools();
 		else this.$toolbar.hide();
+		
+		setTimeout($.proxy(function(){
+			if (!this.isSelectionInElement()) this.$toolbar.hide();
+		}, this), 0);
 	};
 	
 	Compose.prototype.keydown = function(event){
