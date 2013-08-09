@@ -6,13 +6,7 @@
 		
 		this.markdown = options.markdown;
 		
-		this.selection = null;
-		this.selecting = false;
-		
-		this.$element = $(element).attr('contentEditable', true);
-								  
-		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directy through the Compose object
-								  
+		this.$element = $(element).attr('contentEditable', true);					  
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
 						.addClass('compose-toolbar')
@@ -24,49 +18,25 @@
 						});
 		$('body').append(this.$toolbar);
 		
-		$(document).on('mouseup', $.proxy(function(event){
-			if (!this.selecting && 
-				!$.contains(this.$element[0], event.target) && 
-				!$.contains(this.$toolbar[0], event.target)){
-				this.$toolbar.hide();
-			}
-			else{
-				this.selectionEnd(event);
-			}
-			this.selecting = false;
-		}, this));
+		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directy through the Compose object
 		
 		//init markdown parser if there is one
 		if (this.markdown) this.markdown = new this.markdown(this);
 		
-		this.$element.on('mousedown', $.proxy(this.selectionStart, this))
-					  .on('keydown', $.proxy(this.keydown, this))
+		this.$element.on('keydown', $.proxy(this.keydown, this))
 					  .on('keyup', $.proxy(this.keyup, this));
+		 $(document).on('mouseup', $.proxy(this.mouseup, this));
 	};
 	
 	Compose.defaults = {
 		markdown: false,
 	};
 	
-	Compose.prototype.selectionStart = function(event){
-		this.selecting = true;
-	};
-	
-	Compose.prototype.selectionEnd = function(event){
+	Compose.prototype.isSelectionInElement = function(){
+		//@TODO : maybe checking with the common ancestor stuff would be better
 		var selection = rangy.getSelection();
-		if (selection.isCollapsed){
-			this.$toolbar.hide();
-			return;
-		}
-		
-		setTimeout($.proxy(function(){
-			if (rangy.getSelection().isCollapsed){
-				this.$toolbar.hide();
-			}
-		}, this), 0);
-		
-		this.showTools();
-	};
+		return $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
+	}
 	
 	Compose.prototype.showTools = function(){
 		var selection = window.getSelection();
@@ -102,24 +72,26 @@
 		
 		//actually show tools
 		this.$toolbar.show();
-	}
+	};
+	
+	Compose.prototype.mouseup = function(event){
+		if (this.isSelectionInElement()) this.showTools();
+		else this.$toolbar.hide();
+	};
 	
 	Compose.prototype.keydown = function(event){
-		var selection = rangy.getSelection(),
-			subject = selection.anchorNode.wholeText || '';
+		var subject = rangy.getSelection().anchorNode.wholeText || '';
 		
 		//prevent double spaces
 		if (event.which === 32 && subject[subject.length-1].match(/\s/)) event.preventDefault();
 	};
 	
 	Compose.prototype.keyup = function(event){
-		var selection = rangy.getSelection();
-		var contained = $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
-		if (contained) this.showTools();
+		if (this.isSelectionInElement()) this.showTools();
 		else this.$toolbar.hide();
 		
 		//cross browser consistent breaking out of block tags
-		var $current = $(selection.anchorNode);
+		var $current = $(rangy.getSelection().anchorNode);
 		
 		if (event.which === 13){
 			var $p = $('<p>').html('&nbsp;'),
@@ -160,6 +132,7 @@
 			//breaking out of inline tags
 			//this next bit of shitty code is because of a long standing webkit bug that won't let you put the caret inside an empty node
 			//so when the caret is inside an inline tag and the users presses space, we create a new text node with an nbsp in it, and place the caret in there.
+			//@TODO : check for other inline tags
 			if ($current.parent().is('em, strong, a, code')){
 				var $wrap = $(document.createTextNode('a')).text('&nbsp;'),
 					$inline = $current.parent();
