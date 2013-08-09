@@ -50,58 +50,28 @@
 		return $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
 	}
 	
-	var selectionIsBackwards = function(sel) {
-		var backwards = false;
-		if (sel.anchorNode) {
-			backwards = (comparePoints(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset) == 1);
-		}
-		return backwards;
-	};
-	
 	function getClosestAncestorIn(node, ancestor, selfIsAncestor) {
-        var p, n = selfIsAncestor ? node : node.parentNode;
-        while (n) {
-            p = n.parentNode;
-            if (p === ancestor) {
-                return n;
-            }
-            n = p;
-        }
-        return null;
+//        var p, n = selfIsAncestor ? node : node.parentNode;
+//        while (n) {
+//            p = n.parentNode;
+//            if (p === ancestor) {
+//                return n;
+//            }
+//            n = p;
+//        }
+//        return null;
+    	console.log($(ancestor).has(node).length);
+    	if ($(ancestor).has(node).length) return $(node).parentsUntil(ancestor).first()[0];
+    	else return null;
     }
     
-    function getNodeIndex(node) {
+    function getNodeIndex(node){
         var i = 0;
-        while( (node = node.previousSibling) ) {
+        while((node = node.previousSibling)){
             i++;
         }
         return i;
     }
-    
-    function getCommonAncestor(node1, node2) {
-        var ancestors = [], n;
-        for (n = node1; n; n = n.parentNode) {
-            ancestors.push(n);
-        }
-
-        for (n = node2; n; n = n.parentNode) {
-            if (arrayContains(ancestors, n)) {
-                return n;
-            }
-        }
-
-        return null;
-    }
-    
-    var arrayContains = function(arr, val) {
-		var i = arr.length;
-		while (i--) {
-			if (arr[i] === val) {
-				return true;
-			}
-		}
-		return false;
-	};
 	
 	function comparePoints(nodeA, offsetA, nodeB, offsetB) {
         // See http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html#Level-2-Range-Comparing
@@ -121,7 +91,8 @@
         } else {
 
             // Case 4: containers are siblings or descendants of siblings
-            root = getCommonAncestor(nodeA, nodeB);
+//            root = getCommonAncestor(nodeA, nodeB);
+            root = $(nodeA).parents().has(nodeB).first()[0];
             childA = (nodeA === root) ? root : getClosestAncestorIn(nodeA, root, true);
             childB = (nodeB === root) ? root : getClosestAncestorIn(nodeB, root, true);
 
@@ -159,7 +130,7 @@
 		}
 			
 		//check if range is backwards
-		var backwards = selectionIsBackwards(selection);
+		var backwards = (comparePoints(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset) == 1);
 			
 		//compute tools positions
 		range.insertNode($positionElem[0]);
