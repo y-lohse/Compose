@@ -9,7 +9,8 @@
 			.html('h1')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				compose.wrapSelection('<h1>');
+				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<h1>');
+				else compose.unwrapSelection('h1');
 			});
 		},
 		match: function($xpath){
@@ -25,7 +26,8 @@
 			.html('h2')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				compose.wrapSelection('<h2>');
+				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<h2>');
+				else compose.unwrapSelection('h2');
 			});
 		},
 		match: function($xpath){
@@ -41,7 +43,8 @@
 			.html('"')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				compose.wrapSelection('<blockquote>');
+				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<blockquote>');
+				else compose.unwrapSelection('blockquote');
 			});
 		},
 		match: function($xpath){
@@ -58,7 +61,8 @@
 			.css('font-style', 'italic')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				compose.wrapSelection('<em>');
+				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<em>');
+				else compose.unwrapSelection('em');
 			});
 		},
 		match: function($xpath){
@@ -75,7 +79,8 @@
 			.css('font-weight', 'bold')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				compose.wrapSelection('<strong>');
+				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<strong>');
+				else compose.unwrapSelection('strong');
 			});
 		},
 		match: function($xpath){

@@ -108,6 +108,11 @@
 		return $.contains(this.$element[0], selection.anchorNode) && $.contains(this.$element[0], selection.focusNode) && !selection.isCollapsed;
 	}
 	
+	Compose.prototype.getSelectionXPath = function(){
+		var selection = Compose.Range.getSelection();
+		return $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
+	}
+	
 	Compose.prototype.showTools = function(){
 		var selection = Compose.Range.getSelection();
 		var $positionElem = $('<span>'),
@@ -115,7 +120,7 @@
 			clone = range.cloneRange();
 			
 		//check if the tool match the current selection
-		var $xpath = $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
+		var $xpath = this.getSelectionXPath();
 			
 		for (var i = 0, l = this.tools.length; i < l; i++){
 			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass('active');
@@ -270,6 +275,16 @@
 		elem = $(elem).text(range.toString());
 		
 		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
+		
+		return this;
+	};
+	
+	Compose.prototype.unwrapSelection = function(filter){
+		var $element = this.getSelectionXPath().filter(filter),
+			rootNode = $element.parent().is(this.$element);
+			
+		var $orphans = $($element[0].childNodes).unwrap();
+		if (rootNode) $orphans.wrapAll('<p>');
 		
 		return this;
 	};
