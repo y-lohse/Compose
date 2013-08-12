@@ -26,7 +26,7 @@
 			.html('h2')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<h2>');
+				if (!h2.match(compose.getSelectionXPath())) compose.wrapSelection('<h2>');
 				else compose.unwrapSelection('h2');
 			});
 		},
@@ -43,7 +43,7 @@
 			.html('"')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<blockquote>');
+				if (!quote.match(compose.getSelectionXPath())) compose.wrapSelection('<blockquote>');
 				else compose.unwrapSelection('blockquote');
 			});
 		},
@@ -61,7 +61,7 @@
 			.css('font-style', 'italic')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<em>');
+				if (!em.match(compose.getSelectionXPath())) compose.wrapSelection('<em>');
 				else compose.unwrapSelection('em');
 			});
 		},
@@ -79,7 +79,7 @@
 			.css('font-weight', 'bold')
 			.addClass('compose-tool')
 			.on('click', function(event){
-				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<strong>');
+				if (!bold.match(compose.getSelectionXPath())) compose.wrapSelection('<strong>');
 				else compose.unwrapSelection('strong');
 			});
 		},
