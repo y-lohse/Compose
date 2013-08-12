@@ -89,6 +89,22 @@
 	};
 	ComposeTools.push(bold);
 	
+	var paster = {
+		element: null,
+		init: function(compose){
+			compose.on('paste', function(event){
+				event.preventDefault();
+				var pasted = event.originalEvent.clipboardData.getData('text/plain');
+				if (compose.markdown) pasted = compose.markdown.parse(pasted);
+				
+				var $pasted = $('<div>').html(pasted).children().not(':empty');
+				
+				document.execCommand('insertHTML', false, $pasted.wrapAll('<div>').parent().html());
+			});
+		}
+	};
+	ComposeTools.push(paster);
+	
 	window['ComposeTools'] = ComposeTools;
 	
 })(window.jQuery);

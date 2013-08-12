@@ -1,4 +1,4 @@
-(function($){
+(function($, document){
 	'use strict';
 	
 	var ComposeMarkdown = function(composeInstance){
@@ -38,6 +38,8 @@
 			else offset += $node.text().length;
 		}
 	};
+	
+	ComposeMarkdown.prototype.parse = ComposeMarkdown.parse;
 	
 	ComposeMarkdown.prototype.keyup = function(event){
 		var selection = Compose.Range.getSelection();
@@ -129,4 +131,4 @@
 	
 	if (window['Compose']) window['Compose'].ComposeMarkdown = ComposeMarkdown;
 	
-})(window.jQuery);
+})(window.jQuery, document);

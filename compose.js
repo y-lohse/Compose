@@ -123,6 +123,8 @@
 		var $xpath = this.getSelectionXPath();
 			
 		for (var i = 0, l = this.tools.length; i < l; i++){
+			if (!$.isFunction(this.tools[i].match) || !this.tools[i].element) continue;
+			
 			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass('active');
 			else $(this.tools[i].element).removeClass('active');
 		}
