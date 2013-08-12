@@ -264,17 +264,26 @@
 	};
 	
 	Compose.prototype.wrapSelection = function(elem, range){
+		var selection = Compose.Range.getSelection();
 		if (range){
-			var sel = Compose.Range.getSelection();
-			sel.removeAllRanges();
-			sel.addRange(range);
+			selection.removeAllRanges();
+			selection.addRange(range);
 		}
 		else{
-			range = Compose.Range.getSelection().getRangeAt(0);
+			range = selection.getRangeAt(0);
 		}
 		elem = $(elem).text(range.toString());
 		
 		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
+		
+		//reselect text
+		selection = Compose.Range.getSelection();
+		range = Compose.Range.createRange();
+		range.setStart(selection.anchorNode, 0);
+		range.setEnd(selection.anchorNode, selection.anchorNode.wholeText.length);
+		selection.removeAllRanges();
+		selection.addRange(range);
+		this.showTools();
 		
 		return this;
 	};
@@ -285,6 +294,15 @@
 			
 		var $orphans = $($element[0].childNodes).unwrap();
 		if (rootNode) $orphans.wrapAll('<p>');
+		
+		//reselect text
+		var selection = Compose.Range.getSelection();
+		var range = Compose.Range.createRange();
+		range.setStart($orphans.first()[0], 0);
+		range.setEnd($orphans.last()[0], ($orphans.last()[0].nodeType === 3) ? $orphans.last()[0].nodeValue.length : 1);
+		selection.removeAllRanges();
+		selection.addRange(range);
+		this.showTools();
 		
 		return this;
 	};
