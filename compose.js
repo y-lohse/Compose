@@ -113,6 +113,10 @@
 		return $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
 	}
 	
+	Compose.prototype.hideTools = function(){
+		this.$toolbar.hide();
+	};
+	
 	Compose.prototype.showTools = function(){
 		var selection = Compose.Range.getSelection();
 		var $positionElem = $('<span>'),
@@ -125,6 +129,7 @@
 		for (var i = 0, l = this.tools.length; i < l; i++){
 			if (!$.isFunction(this.tools[i].match) || !this.tools[i].element) continue;
 			
+			$(this.tools[i].element).trigger('compose-show');
 			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass('active');
 			else $(this.tools[i].element).removeClass('active');
 		}
@@ -160,10 +165,10 @@
 	
 	Compose.prototype.mouseup = function(event){
 		if (this.isSelectionInElement()) this.showTools();
-		else this.$toolbar.hide();
+		else this.hideTools();
 		
 		setTimeout($.proxy(function(){
-			if (!this.isSelectionInElement()) this.$toolbar.hide();
+			if (!this.isSelectionInElement()) this.hideTools();
 		}, this), 0);
 	};
 	
@@ -176,7 +181,7 @@
 	
 	Compose.prototype.keyup = function(event){
 		if (this.isSelectionInElement()) this.showTools();
-		else this.$toolbar.hide();
+		else this.hideTools();
 		
 		//cross browser consistent breaking out of block tags
 		var $current = $(Compose.Range.getSelection().anchorNode);
