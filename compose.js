@@ -281,11 +281,13 @@
 	
 	Compose.prototype.mouseup = function(event){
 		if (this.isSelectionInElement()) this.showTools();
-		else this.hideTools();
-		
-		setTimeout($.proxy(function(){
-			if (!this.isSelectionInElement()) this.hideTools();
-		}, this), 0);
+		else if (!this.$toolbar.has(event.target).length){
+			this.hideTools();
+			
+			setTimeout($.proxy(function(){
+				if (!this.isSelectionInElement()) this.hideTools();
+			}, this), 0);
+		}
 	};
 	
 	Compose.prototype.keydown = function(event){

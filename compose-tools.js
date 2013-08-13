@@ -71,26 +71,33 @@
 		}, this));
 	});
 	
-//	var a = new Compose.Tool();
-//	a.on('init', function(event){
-//		this.button = $('<button>')
-//		.html('a')
-//		.css('text-decoration', 'underline')
-//		.addClass('compose-tool')
-//		.on('click', function(event){
-//			if (!bold.match(compose.getSelectionXPath())){
-//				var $link = $('<a>').attr('href', 'http://google.com');
-//				compose.wrapSelection($link);
-//			}
-//			else compose.unwrapSelection('a');
-//		});
-//		
-//		this.input = $('<input />');
-//		
-//		this.element = $('<span>')
-//		.append(this.button)
-//		.append(this.input);
-//	});
+	var a = new Compose.Tool();
+	a.on('init', function(event){
+		this.element = $('<button>')
+		.html('a')
+		.css('text-decoration', 'underline')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())){
+				var $link = $('<a>').attr('href', '#');
+				this.compose.wrapSelection($link);
+				
+				this.input.css({
+					'left': this.compose.$toolbar.offset().left,
+					'top': this.compose.$toolbar.offset().top,
+				})
+				.show()
+				.focus();
+				
+				this.compose.hideTools();
+			}
+			else this.compose.unwrapSelection('a');
+		}, this));
+		
+		this.input = $('<input />')
+		.appendTo($('body'))
+		.css('position', 'absolute')
+		.hide();
+	});
 
 	var paster = new Compose.Tool();
 	paster.on('init', function(event){
