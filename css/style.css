@@ -1,0 +1,165 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section,
+summary {
+    display: block;
+}
+audio,
+canvas,
+video {
+    display: inline-block;
+}
+
+*, *:after, *:before{
+	@include box-sizing(border-box);
+}
+
+img{
+    border: 0;
+}
+
+a{
+	&:focus{
+		outline: thin dotted;
+	}
+	
+	&:active,
+	&:hover{
+		outline: 0;
+	}
+}
+
+svg:not(:root){
+    overflow: hidden;
+}
+
+[hidden] {
+    display: none;
+}
+
+table{
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+
+html{
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+}
+h1,h2,h3,h4,h5,h6{
+	font-weight: normal;
+}
+
+ul,ol{
+	list-style-position: inside;
+}
+ol{
+	list-style-type: decimal;
+}
+
+sub,
+sup{
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+sup{
+    top: -0.5em;
+}
+sub{
+    bottom: -0.25em;
+}
+
+abbr[title]{
+    border-bottom: 1px dotted;
+}
+
+b,
+strong{
+    font-weight: bold;
+}
+
+dfn {
+    font-style: italic;
+}
+
+pre,
+code,
+samp{
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+	font-family: monospace, serif;
+}
+
+q{
+    quotes: "\201C" "\201D" "\2018" "\2019";
+}
+
+/******************************************************************************/
+html{
+	font-family: 'Fira Sans';
+	font-weight: 300;
+}
+
+.content{
+	max-width: 600px;
+	margin: auto;
+}
+
+.header{
+	text-align:center;
+	margin: 20px 0 40px;
+}
+.header h1{
+	text-transform:uppercase;
+	font-size:2rem;
+}
+.header h1 em{
+	font-weight:300;
+	text-transform:none;
+}
+.header h3{
+	font-size:1.4rem;
+	margin: 0;
+}
+
+.content h2{
+	font-size: 1.6rem;
+	margin: 20px 0 10px
+}
+.content h3{
+	font-size:1.4rem;
+	margin: 18px 0 6px
+}
+.content p{
+	margin-bottom: 14px;
+	line-height: 1.5;
+}
