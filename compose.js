@@ -2,9 +2,9 @@
 	'use strict';
 	
 	var Compose = function(element, options){
-		options = options || Compose.defaults;
+		options = $.extend({}, Compose.defaults, options);
 		
-		this.tools = [];
+		this.tools = options.tools;
 		this.markdown = options.markdown;
 		
 		this.$element = $(element).attr('contentEditable', true);					  
@@ -26,13 +26,108 @@
 		
 		this.$element.on('keydown', $.proxy(this.keydown, this))
 					  .on('keyup', $.proxy(this.keyup, this));
-		 $(document).on('mouseup', $.proxy(this.mouseup, this));
+		$(document).on('mouseup', $.proxy(this.mouseup, this));
+		
+		//init tools
+		for (var i = 0, l = this.tools.length; i < l; i++){
+			this.tools[i].compose = this;
+			this.tools[i].dispatchEvent({'type': 'init'});
+			if (this.tools[i].element){
+				this.tools[i].element.addClass('compose-tool');
+				this.$toolbar.append(this.tools[i].element);
+			}
+		}
 	};
 	
 	Compose.defaults = {
 		markdown: false,
+		tools: [],
 	};
 	
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 */
+	Compose.EventDispatcher = function(){};
+	
+	Compose.EventDispatcher.prototype = {
+	
+		constructor: Compose.EventDispatcher,
+	
+		addEventListener: function ( type, listener ) {
+	
+			if ( this._listeners === undefined ) this._listeners = {};
+	
+			var listeners = this._listeners;
+	
+			if ( listeners[ type ] === undefined ) {
+	
+				listeners[ type ] = [];
+	
+			}
+	
+			if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+	
+				listeners[ type ].push( listener );
+	
+			}
+	
+		},
+	
+		hasEventListener: function ( type, listener ) {
+	
+			if ( this._listeners === undefined ) return false;
+	
+			var listeners = this._listeners;
+	
+			if ( listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1 ) {
+	
+				return true;
+	
+			}
+	
+			return false;
+	
+		},
+	
+		removeEventListener: function ( type, listener ) {
+	
+			if ( this._listeners === undefined ) return;
+	
+			var listeners = this._listeners;
+			var index = listeners[ type ].indexOf( listener );
+	
+			if ( index !== - 1 ) {
+	
+				listeners[ type ].splice( index, 1 );
+	
+			}
+	
+		},
+	
+		dispatchEvent: function ( event ) {
+	
+			if ( this._listeners === undefined ) return;
+	
+			var listeners = this._listeners;
+			var listenerArray = listeners[ event.type ];
+	
+			if ( listenerArray !== undefined ) {
+	
+				event.target = this;
+	
+				for ( var i = 0, l = listenerArray.length; i < l; i ++ ) {
+	
+					listenerArray[ i ].call( this, event );
+	
+				}
+	
+			}
+	
+		}
+	
+	};
+	
+	//range & selection manipulation utility
 	Compose.Range = {
 		window: window,
 		document: document,
@@ -102,6 +197,27 @@
 		}
 	};
 	
+	//toolspopulate the toolbar
+	Compose.Tool = function(){
+		this.element = null;
+		this.compose = null;
+		
+		Compose.defaults.tools.push(this);
+	};
+	
+	Compose.Tool.prototype = Object.create(Compose.EventDispatcher.prototype);
+	
+	Compose.Tool.prototype.on = function(event, fn){
+		this.addEventListener(event, fn);
+		return this;
+	};
+	
+	Compose.Tool.prototype.match = function(){
+		return false;
+	};
+	
+	
+	//instance prototype
 	Compose.prototype.isSelectionInElement = function(){
 		//@TODO : maybe checking with the common ancestor stuff would be better
 		var selection = Compose.Range.getSelection();
@@ -242,20 +358,6 @@
 				}, this));
 			}
 		}
-	};
-	
-	Compose.prototype.addTools = function(tools){
-		tools = ($.isArray(tools)) ? tools : [tools];
-		
-		for (var i = 0, l = tools.length; i < l; i++){
-			if (!$.isFunction(tools[i].init)) continue;
-			
-			$.proxy(tools[i].init, tools[i], this)();
-			this.tools.push(tools[i]);
-			this.$toolbar.append(tools[i].element);
-		}
-		
-		return this;
 	};
 	
 	Compose.prototype.positionCarret = function(node, offset){

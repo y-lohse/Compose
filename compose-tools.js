@@ -1,139 +1,141 @@
 (function($){
 
-	var ComposeTools = [];
-	
-	var h1 = {
-		element: null,
-		init: function(compose){
-			this.element = $('<button>')
-			.html('h1')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!h1.match(compose.getSelectionXPath())) compose.wrapSelection('<h1>');
-				else compose.unwrapSelection('h1');
-			});
-		},
-		match: function($xpath){
-			return ($xpath.filter('h1').length) ? true : false;
-		}
+	var h1 = new Compose.Tool();
+	h1.match = function($xpath){
+		return ($xpath.filter('h1').length) ? true : false;
 	};
-	ComposeTools.push(h1);
+	h1.on('init', function(event){
+		this.element = $('<button>')
+		.html('h1')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<h1>');
+			else this.compose.unwrapSelection('h1');
+		}, this));
+	});
 	
-	var h2 = {
-		element: null,
-		init: function(compose){
-			this.element = $('<button>')
-			.html('h2')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!h2.match(compose.getSelectionXPath())) compose.wrapSelection('<h2>');
-				else compose.unwrapSelection('h2');
-			});
-		},
-		match: function($xpath){
-			return ($xpath.filter('h2').length) ? true : false;
-		}
+	var h2 = new Compose.Tool();
+	h2.match = function($xpath){
+		return ($xpath.filter('h2').length) ? true : false;
 	};
-	ComposeTools.push(h2);
+	h2.on('init', function(event){
+		this.element = $('<button>')
+		.html('h2')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<h2>');
+			else this.compose.unwrapSelection('h2');
+		}, this));
+	});
 	
-	var quote = {
-		element: null,
-		init: function(compose){
-			this.element = $('<button>')
-			.html('"')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!quote.match(compose.getSelectionXPath())) compose.wrapSelection('<blockquote>');
-				else compose.unwrapSelection('blockquote');
-			});
-		},
-		match: function($xpath){
-			return ($xpath.filter('blockquote').length) ? true : false;
-		}
+	var quote = new Compose.Tool();
+	quote.match = function($xpath){
+		return ($xpath.filter('blockquote').length) ? true : false;
 	};
-	ComposeTools.push(quote);
+	quote.on('init', function(event){
+		this.element = $('<button>')
+		.html('"')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<blockquote>');
+			else this.compose.unwrapSelection('blockquote');
+		}, this));
+	});
 	
-	var em = {
-		element: null,
-		init: function(compose){
-			this.element = $('<button>')
-			.html('i')
-			.css('font-style', 'italic')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!em.match(compose.getSelectionXPath())) compose.wrapSelection('<em>');
-				else compose.unwrapSelection('em');
-			});
-		},
-		match: function($xpath){
-			return ($xpath.filter('em').length) ? true : false;
-		}
+	var em = new Compose.Tool();
+	em.match = function($xpath){
+		return ($xpath.filter('em').length) ? true : false;
 	};
-	ComposeTools.push(em);
+	em.on('init', function(event){
+		var compose = event.compose;
+		
+		this.element = $('<button>')
+		.html('i')
+		.css('font-style', 'italic')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<em>');
+			else this.compose.unwrapSelection('em');
+		}, this));
+	});
 	
-	var bold = {
-		element: null,
-		init: function(compose){
-			this.element = $('<button>')
-			.html('b')
-			.css('font-weight', 'bold')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!bold.match(compose.getSelectionXPath())) compose.wrapSelection('<strong>');
-				else compose.unwrapSelection('strong');
-			});
-		},
-		match: function($xpath){
-			return ($xpath.filter('strong').length) ? true : false;
-		}
+	var bold = new Compose.Tool();
+	bold.match = function($xpath){
+		return ($xpath.filter('strong').length) ? true : false;
 	};
-	ComposeTools.push(bold);
+	bold.on('init', function(event){
+		var compose = event.compose;
+		
+		this.element = $('<button>')
+		.html('b')
+		.css('font-weight', 'bold')
+		.on('click', $.proxy(function(event){
+			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<strong>');
+			else this.compose.unwrapSelection('strong');
+		}, this));
+	});
 	
-	var a = {
-		element: null,
-		button: null,
-		input: null,
-		init: function(compose){
-			this.button = $('<button>')
-			.html('a')
-			.css('text-decoration', 'underline')
-			.addClass('compose-tool')
-			.on('click', function(event){
-				if (!bold.match(compose.getSelectionXPath())){
-					var $link = $('<a>').attr('href', 'http://google.com');
-					compose.wrapSelection($link);
-				}
-				else compose.unwrapSelection('a');
-			});
+//	var a = new Compose.Tool();
+//	a.on('init', function(event){
+//		this.button = $('<button>')
+//		.html('a')
+//		.css('text-decoration', 'underline')
+//		.addClass('compose-tool')
+//		.on('click', function(event){
+//			if (!bold.match(compose.getSelectionXPath())){
+//				var $link = $('<a>').attr('href', 'http://google.com');
+//				compose.wrapSelection($link);
+//			}
+//			else compose.unwrapSelection('a');
+//		});
+//		
+//		this.input = $('<input />');
+//		
+//		this.element = $('<span>')
+//		.append(this.button)
+//		.append(this.input);
+//	});
+
+	var paster = new Compose.Tool();
+	paster.on('init', function(event){
+		this.compose.on('paste', $.proxy(function(event){
+			event.preventDefault();
+			var pasted = event.originalEvent.clipboardData.getData('text/plain');
+			if (this.compose.markdown) pasted = this.compose.markdown.parse(pasted);
 			
-			this.input = $('<input />');
+			var $pasted = $('<div>').html(pasted).children().not(':empty');
 			
-			this.element = $('<span>')
-			.append(this.button)
-			.append(this.input);
-		},
-		match: function($xpath){
-			return ($xpath.filter('a').length) ? true : false;
-		}
-	};
-	ComposeTools.push(a);
-	
-	var paster = {
-		element: null,
-		init: function(compose){
-			compose.on('paste', function(event){
-				event.preventDefault();
-				var pasted = event.originalEvent.clipboardData.getData('text/plain');
-				if (compose.markdown) pasted = compose.markdown.parse(pasted);
-				
-				var $pasted = $('<div>').html(pasted).children().not(':empty');
-				
-				document.execCommand('insertHTML', false, $pasted.wrapAll('<div>').parent().html());
-			});
-		}
-	};
-	ComposeTools.push(paster);
-	
-	window['ComposeTools'] = ComposeTools;
+			document.execCommand('insertHTML', false, $pasted.wrapAll('<div>').parent().html());
+		}, this));
+	});
+
+
+//	
+//	var a = {
+//		element: null,
+//		button: null,
+//		input: null,
+//		init: function(compose){
+//			this.button = $('<button>')
+//			.html('a')
+//			.css('text-decoration', 'underline')
+//			.addClass('compose-tool')
+//			.on('click', function(event){
+//				if (!bold.match(compose.getSelectionXPath())){
+//					var $link = $('<a>').attr('href', 'http://google.com');
+//					compose.wrapSelection($link);
+//				}
+//				else compose.unwrapSelection('a');
+//			});
+//			
+//			this.input = $('<input />');
+//			
+//			this.element = $('<span>')
+//			.append(this.button)
+//			.append(this.input);
+//		},
+//		match: function($xpath){
+//			return ($xpath.filter('a').length) ? true : false;
+//		}
+//	};
+//	ComposeTools.push(a);
+//	
+//	window['ComposeTools'] = ComposeTools;
 	
 })(window.jQuery);
