@@ -62,7 +62,7 @@
 			/(\*{2}.+\*{2})|(_{2}.+_{2})/g, //strong
 			/`[^`\n]+`/g,				//inline code
 			/\[.+\]\(.+( ".+")?\)/g,	//markdown link
-//			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url, disabled because the trigger fials with trailing spaces
+//			/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])\s/g,	//regular url, disabled because the trigger fails with trailing spaces
 			/\.{3}/g,					//ellipsis
 			/--[^-]/g,						//em dash
 			/(^|[-\u2014/(\[{"\s])'/,	//opening singles

@@ -43,27 +43,27 @@ This dependency might be dropped at some point in the future but thi is not a pr
 
 ## FAQ
 
-### Can I add more tools to Compose?
+**Can I add more tools to Compose?**
 
-Compose ships with the most usefull tools — titles, bold, italics, quotes, links and soon images. These should be enough for most use cases. Please note that providing a limited set of tool is again by design — downing the user with options will not help him.
+Compose ships with the most usefull tools — titles, bold, italics, quotes, links and soon images. These should be enough for most use cases. Please note that providing a limited set of tool is again by design — drowning the user with options will not help him.
 
 It is however possible to add custom tools. Compose provides an API for this which is not yet documented. The code for the existing tools can help you for now.
 
-### Can I pick which tool are displayed? Can I reorder them?
+**Can I pick which tool are displayed? Can I reorder them?**
 
 Compose will include a mechanism to control which tools are shown or not, but this isn't implemented yet. There is no plan to add features like tool ordering or further control over the toolbar at this point. If you need this, please use css.
 
-### Can I change the way the toolbar looks?
+**Can I change the way the toolbar looks?**
 
 The css file that ships with Compose define how the tools look like. Feel free to re-style them at will. The toolbar and the individual tools have class names so the ycan be targeted. These class names will be documented and configurable.
 
-### I don't want Markdown support
+**I don't want Markdown support**
 
 Markdown support will be easy to turn off any time soon. However, Markdown helps creating things lik lists and does some behind the sene typographic conversions. It's probably not a so good idea to turn it off completely.
 
 Compose might provide fine grained control in the future over what Markdown features should be enabled or not.
 
-### My custom stylesheet doesn't use tag names but classes. Can I still use Compose?
+**My custom stylesheet doesn't use tag names but classes. Can I still use Compose?**
 
 Sure, but it might cause some issues. By default, both tools and markdown conversion only output regular html tags without attributes.
 
