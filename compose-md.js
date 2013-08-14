@@ -134,6 +134,9 @@
 		}
 	};
 	
-	if (window['Compose']) window['Compose'].ComposeMarkdown = ComposeMarkdown;
+	if (window['Compose']){
+		window['Compose'].ComposeMarkdown = ComposeMarkdown;
+		window['Compose'].defaults.markdown = ComposeMarkdown;
+	}
 	
 })(window.jQuery, document);

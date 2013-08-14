@@ -2,10 +2,11 @@
 	'use strict';
 	
 	var Compose = function(element, options){
-		options = $.extend({}, Compose.defaults, options);
+		options = options || {};
+		var settings = $.extend({}, Compose.defaults, options);
 		
-		this.tools = options.tools;
-		this.markdown = options.markdown;
+		this.tools = settings.tools;
+		this.markdown = settings.markdown;
 		
 		this.$element = $(element).attr('contentEditable', true);					  
 		this.$toolbar = $('<menu>')
