@@ -1,66 +1,65 @@
 <!doctype html>
-<html>
-	<head>
-		<title>
-			Compose tests
-		</title>
-		<style type="text/css">
-			*{
-				margin: 0;
-				padding: 0;
-			}
-			
-			#composearea{
-				margin: 50px 20px;
-				width: 400px;
-			}
-			
-			p{
-				padding: 10px;
-			}
-			
-			blockquote{
-				background: #ccc;
-				padding: 8px;
-			}
-		</style>
-		<link href="compose.css" rel="stylesheet" />
-	</head>
-	<body>
-		
-		<div id="composearea">
-			
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>Compose — a simple WYSIWYG editor.</title>
+	<meta name="description" content="Compose is a real WYSIWYG editor that is simple to use and that emphasises the content">
+	<link rel="shortcut icon" href="/favicon.ico?v=1">
+	
+	<meta name="viewport" content="width=device-width">
+	
+	<link rel="stylesheet" href="compose.css?v=0">
+	
+	<!-- Candy -->
+	<link rel="dns-prefetch" href="//ajax.googleapis.com" />
+	
+</head>
+<body>
+	<section class="content">
+		<header class="header">
 			<h1>
-				Main title <em>with</em> subtag
+				Compose <em>beta</em>
 			</h1>
-			
-			<p>
-				This is a paragraph with some content.
-			</p>
-			
-			```
-			code
-			```
-			
-			<p>
-				Here is another line in a paragraph.<br />
-				And this one has a line break...
-			</p>
-		</div>
+			<h3>
+				A simple WYSIWYG editor focused on content.
+			</h3>
+		</header>
 		
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<!--		<script src="compose.js"></script>-->
-		<script src="marked.js"></script>
-		<script src="compose-core.js"></script>
-		<script src="compose-md.js"></script>
-		<script src="compose-tools.js"></script>
-		<script>
-			$(function(){
-				var compose = new Compose('#composearea', {
-					markdown: Compose.ComposeMarkdown
-				});
-//				compose.addTools(ComposeTools);
+		<div class="demo">
+			## Demo & Features
+			
+			*This* is the actual content editor you're looking at. Go on, start editing this text.
+			
+			A good content editor should provide simple tools for formating but most importantly it should emphasis the content. After all, that's what you are doing with it, writting.
+			
+			### Formating
+			
+			Formating tools are kept out of the way until you need them. Try selecting some text to see how it works.
+			
+			Compose has built-in Markdown support so you can format your text with natural synthax. Start a new list with an hyphen or a "1.", create new titles with #...
+		</div>
+	</section>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<!--<script src="compose.js"></script>-->
+	<script src="marked.js"></script>
+	<script src="compose-core.js"></script>
+	<script src="compose-md.js"></script>
+	<script src="compose-tools.js"></script>
+	<script>
+		$(function(){
+			var compose = new Compose('.demo', {
+				markdown: Compose.ComposeMarkdown
 			});
-		</script>
-	</body>
+		});
+	</script>
+</body>
 </html>

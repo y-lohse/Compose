@@ -1,5 +1,7 @@
 .compose-toolbar{
 	background: #333;
+	padding: 0;
+	margin: 0;
 }
 .compose-toolbar button{
 	background: none;
