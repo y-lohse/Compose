@@ -72,18 +72,26 @@
 	});
 	
 	var a = new Compose.Tool();
+	a.hideInput = function(){
+		this.input.val('').blur().hide();
+	};
+	a.match = function($xpath){
+		return ($xpath.filter('a').length) ? true : false;
+	};
 	a.on('init', function(event){
+		this.reflink = null;
+		
 		this.element = $('<button>')
 		.html('a')
 		.css('text-decoration', 'underline')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())){
-				var $link = $('<a>').attr('href', '#');
+				var $link = this.reflink = $('<a>').attr('href', '#');
 				this.compose.wrapSelection($link);
 				
 				this.input.css({
-					'left': this.compose.$toolbar.offset().left,
-					'top': this.compose.$toolbar.offset().top,
+					'left': $link.offset().left,
+					'top': $link.offset().top+$link.height(),
 				})
 				.show()
 				.focus();
@@ -96,7 +104,20 @@
 		this.input = $('<input />')
 		.appendTo($('body'))
 		.css('position', 'absolute')
-		.hide();
+		.hide()
+		.on('keyup', $.proxy(function(event){
+			console.log(event.which);
+			if (event.which === 13){
+				this.reflink.attr('href', this.input.val());
+				this.hideInput();
+			}
+			else if (event.which === 27){
+				this.hideInput();
+			}
+		}, this))
+		.on('blur', $.proxy(function(){
+			this.input.hide();
+		}, this));
 	});
 
 	var paster = new Compose.Tool();

@@ -386,8 +386,8 @@
 		elem = $(elem).text(range.toString());
 			
 		if (range.startOffset !== 0){
-			var chunk1 = document.createTextNode(range.startContainer.data.substring(0, range.startOffset)),
-				chunk2 = document.createTextNode(range.startContainer.data.substring(range.startOffset));
+			var chunk1 = document.createTextNode(range.startContainer.data.substring(0, range.startOffset));
+//				chunk2 = document.createTextNode(range.startContainer.data.substring(range.startOffset));
 			$(range.startContainer).before(chunk1, elem);
 			$(range.startContainer).remove();
 		}
