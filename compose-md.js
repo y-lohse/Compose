@@ -43,7 +43,6 @@
 	
 	ComposeMarkdown.prototype.keyup = function(event){
 		var selection = Compose.Range.getSelection();
-		var node = selection.anchorNode;
 		var $parent = $((selection.anchorNode.nodeType === 1) ? selection.anchorNode : selection.anchorNode.parentNode);
 		
 		//get the content we'll test, but rremove any special chars that will fuck up the regex
@@ -94,11 +93,17 @@
 			var actualOffset = plainSubject.indexOf(selection.anchorNode.data)+selection.focusOffset;
 			var parsedChunk = $(ComposeMarkdown.parse(plainSubject.substring(0, actualOffset)));
 			var destination = actualOffset-(actualOffset-parsedChunk.text().length);
-					
+			
 			var $html = $(ComposeMarkdown.parse(subject));
 			
 			$parent.empty().append($html);
-			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre') && $parent.is('p')) $html.unwrap();
+			if ($html.is('blockquote, h1, h2, h3, h4, h5, h6, hr, ol, ul, p, pre')){
+				if ($parent.is('p')) $html.unwrap();//block node inside another block node
+				else if ($parent.is('em, strong, a')){//block node inside an inline node
+					$html = $html.children();
+					$html.unwrap();
+				}
+			}
 			
 			//reposition carret
 			if ($html.is('hr')){
