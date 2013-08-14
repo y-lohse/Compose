@@ -110,7 +110,7 @@
 					this.positionCarret($p[0], 0);
 				}
 			}
-			else if (selection.focusOffset < selection.anchorNode.innerText.length){
+			else if (selection.focusOffset < $(selection.anchorNode).text().length){
 				//caret wesn't at th end, try to reposition it where it used to be
 				var newOffset = ComposeMarkdown.matchOffset($html, destination, 0);
 				this.positionCarret(newOffset.node, newOffset.offset);
