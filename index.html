@@ -18,12 +18,14 @@
 	
 	<link rel="stylesheet" href="fonts/fira.css?v=0">
 	<link rel="stylesheet" href="css/style.css?v=0">
+	<link rel="stylesheet" href="css/compose.css?v=0">
 	
 	<!-- Candy -->
 	<link rel="dns-prefetch" href="//ajax.googleapis.com" />
 	
 </head>
 <body>
+	<a href="https://github.com/y-lohse/Compose"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
 	<section class="content">
 		<header class="header">
 			<h1>
@@ -56,54 +58,19 @@
 			</p>
 			
 			<p>
-				Compose has built-in Markdown support so you can format your text with natural synthax. Start titles with <em>#</em> or lists with <em>*</em>, etc.
-			</p>
-			
-			<h2>
-				Notes on embedding Compose
-			</h2>
-			
-			<p>
-				<strong>Please note that Compose is beta at this point.</strong> Documentation is still inexistent and some core tools are missing. This page will be updated as the project matures.
-			</p>
-			
-			<p>
-				Compose is not really meant to be dumped on top of a project without customization. The whole point of Compose is to show the writer how his content will be displayed in the end; this means you should at least style the editor to look like the final content. Usually this only involves loading a css file. <br />
-				Apart from this, Compose is composed (haha) of a js file and a css file.
-			</p>
-			
-			<h3>
-				Browser support & dependency
-			</h3>
-			
-			<p>
-				At this point, wide browser support is <strong>not</strong> a priority for Compose. It works in the latest (and not-so-latest) versions of Chrome & Firefox. It should work in Safari & Opera but this hasn't been tested yet. IE versions above 9 will be supported any time soon, versions 9 or below are not on the schedule right now.
-			</p>
-			
-			<p>
-				Compose uses jQuery for its internal DOM manipulation and tools. However it only uses a rather small and stable portion of jQuery, which means any recent version of jQuery will do. While I don't feel it's problematic right now, the jQuery dependecy might be dropped at some point in the future.
-			</p>
-			
-			<h3>
-				Tools & customization
-			</h3>
-			
-			<p>
-				Again, Compose is meant to be simple for the end user — this includes not clutering the interface with tools he'll never use. Compose ships with a set of tools that include two title levels, bold, italics, and quotes. Future tools will include links and maybe images.
-			</p>
-			
-			<p>
-				You understandbly might feel the need to add other tools. While the tools API isn't very mature, it's actually quite easy to do. As of now, you should read the corresponding source code. A better documentation will come at some point in the future.
-			</p>
-			
-			<p>
-				Styling the tools is done via css, just override the default styles that are shipped with Compose.
-			</p>
-			
-			<p>
-				Markdown support can be turned off quite easily. Look at the code until it's documented.
+				Compose has built-in Markdown support so you can format your text with natural synthax. Start a new list with an hyphen or a "1.", create new titles with #...
 			</p>
 		</div>
 	</section>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="compose.js"></script>
+	<script>
+		$(function(){
+			var compose = new Compose('.demo', {
+				markdown: Compose.ComposeMarkdown
+			});
+		});
+	</script>
 </body>
 </html>
