@@ -17,7 +17,7 @@ By design, Compose is **not** meant to be simply dumped on top of any existing p
 
 Say you want to use Compose to write blog posts. You'll probably already have some css ready to style posts.
 
-```
+```css
 .blog-post h1{
   /*some rules*/
 }
@@ -28,7 +28,8 @@ Say you want to use Compose to write blog posts. You'll probably already have so
 ```
 
 All you need to do is include this css file, and make sure the Compose container gets those styles.
-```
+
+```html
 <div id="compose-area" class="blog-post">
 </div>
 ```
@@ -42,7 +43,7 @@ This dependency might be dropped at some point in the future but thi is not a pr
 
 ## FAQ
 
-### Can I add more tools to COmpose?
+### Can I add more tools to Compose?
 
 Compose ships with the most usefull tools — titles, bold, italics, quotes, links and soon images. These should be enough for most use cases. Please note that providing a limited set of tool is again by design — downing the user with options will not help him.
 
