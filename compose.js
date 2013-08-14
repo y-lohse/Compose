@@ -384,14 +384,24 @@
 			range = selection.getRangeAt(0);
 		}
 		elem = $(elem).text(range.toString());
+			
+		if (range.startOffset !== 0){
+			var chunk1 = document.createTextNode(range.startContainer.data.substring(0, range.startOffset)),
+				chunk2 = document.createTextNode(range.startContainer.data.substring(range.startOffset));
+			$(range.startContainer).before(chunk1, elem);
+			$(range.startContainer).remove();
+		}
+		else{
+			elem.insertAfter(range.startContainer.previousSibling);
+		}
 		
-		document.execCommand('insertHTML', false, elem.wrap('<div>').parent().html());
+		range.deleteContents();
 		
 		//reselect text
 		selection = Compose.Range.getSelection();
 		range = Compose.Range.createRange();
-		range.setStart(selection.anchorNode, 0);
-		range.setEnd(selection.anchorNode, selection.anchorNode.wholeText.length);
+		range.setStart(elem[0], 0);
+		range.setEnd(elem[0], 1);
 		selection.removeAllRanges();
 		selection.addRange(range);
 		this.showTools();

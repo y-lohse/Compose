@@ -111,38 +111,5 @@
 			document.execCommand('insertHTML', false, $pasted.wrapAll('<div>').parent().html());
 		}, this));
 	});
-
-
-//	
-//	var a = {
-//		element: null,
-//		button: null,
-//		input: null,
-//		init: function(compose){
-//			this.button = $('<button>')
-//			.html('a')
-//			.css('text-decoration', 'underline')
-//			.addClass('compose-tool')
-//			.on('click', function(event){
-//				if (!bold.match(compose.getSelectionXPath())){
-//					var $link = $('<a>').attr('href', 'http://google.com');
-//					compose.wrapSelection($link);
-//				}
-//				else compose.unwrapSelection('a');
-//			});
-//			
-//			this.input = $('<input />');
-//			
-//			this.element = $('<span>')
-//			.append(this.button)
-//			.append(this.input);
-//		},
-//		match: function($xpath){
-//			return ($xpath.filter('a').length) ? true : false;
-//		}
-//	};
-//	ComposeTools.push(a);
-//	
-//	window['ComposeTools'] = ComposeTools;
 	
 })(window.jQuery);
