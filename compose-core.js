@@ -429,5 +429,16 @@
 		return this;
 	};
 	
+	//expose compose
 	window['Compose'] = Compose;
+	
+	//jquery plugin
+	$.fn.Compose =function(options){
+		return this.each(function(){
+			$(this).data('compose', new Compose(this, options));
+		});
+	};
+	
+	$.fn.Compose.constructor = Compose;
+	
 })(window.jQuery, document, window);
