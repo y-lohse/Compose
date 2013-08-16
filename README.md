@@ -34,12 +34,27 @@ All you need to do is include this css file, and make sure the Compose container
 </div>
 ```
 
+### Init compose
+
+```js
+//jquery style
+$('#your-container').Compose(settings);
+
+//not jquery
+new Compose('#your-container', settings);
+```
+
+The `settings` variable is a plain js object and can configure some stuff. Supported options:
+
+- `markdwon': See the FAQ for more about this option
+- `tools': an array of tools that will be attached to this instance of Compose
+
 ## Browser support & dependency
 
 At this point, wide browser support is **not** a priority for Compose. It works in the latest (and not-so-latest) versions of Chrome & Firefox. It should work in Safari & Opera but this hasn't been tested yet. IE10 & above will be supported (currently works but slightly buggy), IE9 and below are not on the schedule for now.
 
-COmpose relies on jQuery for internal DOM manipulation. As it only uses a very small and stable subset of jQuery, any recent version should work.  
-This dependency might be dropped at some point in the future but thi is not a priority right now.
+Compose relies on jQuery for internal DOM manipulation. As it only uses a very small and stable subset of jQuery, any recent version should work.  
+This dependency might be dropped at some point in the future but this is not a priority right now.
 
 ## FAQ
 
@@ -58,10 +73,16 @@ Compose will include a mechanism to control which tools are shown or not, but th
 The css file that ships with Compose define how the tools look like. Feel free to re-style them at will. The toolbar and the individual tools have class names so the ycan be targeted. These class names will be documented and configurable.
 
 **I don't want Markdown support**
+**I only want partial Markdown support**
+**What flavor of markdown does Compose use?**
 
-Markdown support will be easy to turn off any time soon. However, Markdown helps creating things lik lists and does some behind the sene typographic conversions. It's probably not a so good idea to turn it off completely.
+Let's state it upfront: it's a bad idea to turn off markdown completely. If you do so you'll need to provide tools for lists, code and maybe other types of content. The Markdown support also provides typographic suggar (proper quotes and similar things).
 
-Compose might provide fine grained control in the future over what Markdown features should be enabled or not.
+That being said, there are a number of things you can do to tweak the behavor of Markdown. First, you can turn it off completely by setting the `markdown` option to false.
+
+Second, Compose uses [marked](https://github.com/chjj/marked/) to convert markdown to html (with Github Flavored Markdown). It's not vry practical right now, but you can tweak it's behavior via the global marked object and via the ComposeMarkdown object. More on this soon.
+
+Lastly, you can plug in a custom Makrdown parser. Pass in a function for the `markdown`, it will get called at init time and receive the current compose instance as a parameter. After that, you're on your own.
 
 **My custom stylesheet doesn't use tag names but classes. Can I still use Compose?**
 
@@ -69,4 +90,4 @@ Sure, but it might cause some issues. By default, both tools and markdown conver
 
 For the tools, you can tweak them to add custom class names to element. Compsoe migth provide an API for this in the future. Markdown however does not support attributes so you'll need to disable it, at least partly. Again, a solution for this might be designed in the future.
 
-Another option is to duplicate your sttylesheet and replace class names with actual tags. While this isn't great, it would work.
+Another option is to duplicate your stylesheet and replace class names with actual tags. While this isn't great, it would work.
