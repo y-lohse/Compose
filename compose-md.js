@@ -93,6 +93,8 @@
 			var actualOffset = plainSubject.indexOf(selection.anchorNode.data)+selection.focusOffset;
 			var parsedChunk = $(ComposeMarkdown.parse(plainSubject.substring(0, actualOffset)));
 			var destination = actualOffset-(actualOffset-parsedChunk.text().length);
+			var atEnd = !(selection.anchorNode.nodeType === 3 && selection.focusOffset < selection.anchorNode.data.length);
+			
 			
 			var $html = $(ComposeMarkdown.parse(subject));
 			
@@ -115,7 +117,7 @@
 					this.positionCarret($p[0], 0);
 				}
 			}
-			else if (selection.anchorNode.nodeType === 3 && selection.focusOffset < selection.anchorNode.innerText.length){
+			else if (!atEnd){
 				//caret wesn't at th end, try to reposition it where it used to be
 				var newOffset = ComposeMarkdown.matchOffset($html, destination, 0);
 				this.positionCarret(newOffset.node, newOffset.offset);
