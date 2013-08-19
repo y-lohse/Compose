@@ -3,15 +3,15 @@
 	
 	var Compose = function(element, options){
 		options = options || {};
-		var settings = $.extend({}, Compose.defaults, options);
+		this.settings = $.extend({}, Compose.defaults, options);
 		
-		this.tools = settings.tools;
-		this.markdown = settings.markdown;
+		this.tools = this.settings.tools;
+		this.markdown = this.settings.markdown;
 		
 		this.$element = $(element).attr('contentEditable', true);					  
 		this.$toolbar = $('<menu>')
 						.attr('type', 'toolbar')
-						.addClass('compose-toolbar')
+						.addClass(this.settings.toolbarClass)
 						.css({
 							'position': 'absolute',
 							'top': 0,
@@ -34,7 +34,7 @@
 			this.tools[i].compose = this;
 			this.tools[i].dispatchEvent({'type': 'init'});
 			if (this.tools[i].element){
-				this.tools[i].element.addClass('compose-tool');
+				this.tools[i].element.addClass(this.settings.toolClass);
 				this.$toolbar.append(this.tools[i].element);
 			}
 		}
@@ -43,6 +43,9 @@
 	Compose.defaults = {
 		markdown: false,
 		tools: [],
+		toolbarClass: 'compose-toolbar',
+		toolClass: 'compose-tool',
+		toolClassActive: 'active',
 	};
 	
 	/**
@@ -247,8 +250,8 @@
 			if (!$.isFunction(this.tools[i].match) || !this.tools[i].element) continue;
 			
 			$(this.tools[i].element).trigger('compose-show');
-			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass('active');
-			else $(this.tools[i].element).removeClass('active');
+			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass(this.settings.toolClassActive);
+			else $(this.tools[i].element).removeClass(this.settings.toolClassActive);
 		}
 			
 		//check if range is backwards, needs to be done here
