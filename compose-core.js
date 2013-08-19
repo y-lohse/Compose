@@ -5,7 +5,6 @@
 		options = options || {};
 		this.settings = $.extend({}, Compose.defaults, options);
 		
-		this.tools = this.settings.tools;
 		this.markdown = this.settings.markdown;
 		
 		this.$element = $(element).attr('contentEditable', true);					  
@@ -20,7 +19,7 @@
 						});
 		$('body').append(this.$toolbar);
 		
-		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directy through the Compose object
+		this.on = $.proxy(this.$element.on, this.$element);//now we can register event listeners directly through the Compose object
 		
 		//init markdown parser if there is one
 		if (this.markdown) this.markdown = new this.markdown(this);
@@ -30,19 +29,15 @@
 		$(document).on('mouseup', $.proxy(this.mouseup, this));
 		
 		//init tools
-		for (var i = 0, l = this.tools.length; i < l; i++){
-			this.tools[i].compose = this;
-			this.tools[i].dispatchEvent({'type': 'init'});
-			if (this.tools[i].element){
-				this.tools[i].element.addClass(this.settings.toolClass);
-				this.$toolbar.append(this.tools[i].element);
-			}
+		this.tools = {};
+		for (var tool in this.settings.tools){
+			this.addTool(this.settings.tools[tool]);
 		}
 	};
 	
 	Compose.defaults = {
 		markdown: false,
-		tools: [],
+		tools: {},
 		toolbarClass: 'compose-toolbar',
 		toolClass: 'compose-tool',
 		toolClassActive: 'active',
@@ -141,6 +136,7 @@
 		createRange: function(){
 			return this.document.createRange();
 		},
+		//the three following functions are from rangy : http://code.google.com/p/rangy/
 		getClosestAncestorIn:function(node, ancestor){
 			var p, n = node;
 			while (n) {
@@ -201,12 +197,14 @@
 		}
 	};
 	
-	//toolspopulate the toolbar
-	Compose.Tool = function(){
+	//tools populate the toolbar
+	Compose.Tool = function(name){
+		name = name || '';
+		this.name = name;
 		this.element = null;
 		this.compose = null;
 		
-		Compose.defaults.tools.push(this);
+		Compose.defaults.tools[name] = this;
 	};
 	
 	Compose.Tool.prototype = Object.create(Compose.EventDispatcher.prototype);
@@ -233,8 +231,36 @@
 		return $(selection.getRangeAt(0).commonAncestorContainer).parentsUntil(this.$element).add(selection.getRangeAt(0).commonAncestorContainer);
 	}
 	
+	Compose.prototype.addTool = function(tool){
+		if (!this.settings.tools[tool]){
+			this.tools[tool.name] = tool;
+			this.tools[tool.name].compose = this;
+			this.tools[tool.name].dispatchEvent({'type': 'init'});
+			if (this.tools[tool.name].element){
+				this.tools[tool.name].element.addClass(this.settings.toolClass);
+				this.$toolbar.append(this.tools[tool.name].element);
+			}
+		}
+	}
+	
+	Compose.prototype.removeTool = function(toolName){
+		if (this.settings.tools[toolName]){
+			if (this.tools[toolName].element){
+				this.$toolbar.find(this.tools[toolName].element).remove();
+			}
+			
+			this.tools[toolName].dispatchEvent({'type': 'exit'});
+			delete this.tools[toolName];
+		}
+	}
+	
 	Compose.prototype.hideTools = function(){
 		this.$toolbar.hide();
+		
+		for (var tool in this.tools){
+			if (!$.isFunction(this.tools[tool].match) || !this.tools[tool].element) continue;
+			$(this.tools[tool].element).trigger('compose-hide');
+		}
 	};
 	
 	Compose.prototype.showTools = function(){
@@ -246,18 +272,18 @@
 		//check if the tool match the current selection
 		var $xpath = this.getSelectionXPath();
 			
-		for (var i = 0, l = this.tools.length; i < l; i++){
-			if (!$.isFunction(this.tools[i].match) || !this.tools[i].element) continue;
+		for (var tool in this.tools){
+			if (!$.isFunction(this.tools[tool].match) || !this.tools[tool].element) continue;
 			
-			$(this.tools[i].element).trigger('compose-show');
-			if (this.tools[i].match($xpath, this)) $(this.tools[i].element).addClass(this.settings.toolClassActive);
-			else $(this.tools[i].element).removeClass(this.settings.toolClassActive);
+			$(this.tools[tool].element).trigger('compose-show');
+			if (this.tools[tool].match($xpath, this)) $(this.tools[tool].element).addClass(this.settings.toolClassActive);
+			else $(this.tools[tool].element).removeClass(this.settings.toolClassActive);
 		}
 			
 		//check if range is backwards, needs to be done here
 		var backwards = (Compose.Range.comparePoints(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset) == 1);
 			
-		//compute tools positions
+		//compute toolbar positions
 		range.insertNode($positionElem[0]);
 		var position = $positionElem.offset();
 		//@TODO : check for colision with browser boundaries
@@ -288,7 +314,7 @@
 		else if (!this.$toolbar.has(event.target).length){
 			this.hideTools();
 			
-			setTimeout($.proxy(function(){
+			window.setTimeout($.proxy(function(){
 				if (!this.isSelectionInElement()) this.hideTools();
 			}, this), 0);
 		}
@@ -349,7 +375,7 @@
 			//so when the caret is inside an inline tag and the users presses space, we create a new text node with an nbsp in it, and place the caret in there.
 			//@TODO : check for other inline tags
 			if ($current.parent().is('em, strong, a, code')){
-				var $wrap = $(document.createTextNode('a')).text('&nbsp;'),
+				var $wrap = $(document.createTextNode('')).text('&nbsp;'),
 					$inline = $current.parent();
 				
 				$inline.html($inline.html().replace(/<br( \/)?>$/g, '').replace(/&nbsp;$/, '').replace(/\s$/, ''));
@@ -392,6 +418,7 @@
 		if (range.startOffset !== 0){
 			var chunk1 = document.createTextNode(range.startContainer.data.substring(0, range.startOffset));
 //				chunk2 = document.createTextNode(range.startContainer.data.substring(range.startOffset));
+			//not sure this should work, but it does cross browser.
 			$(range.startContainer).before(chunk1, elem);
 			$(range.startContainer).remove();
 		}

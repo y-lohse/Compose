@@ -1,6 +1,6 @@
 (function($){
 
-	var h1 = new Compose.Tool();
+	var h1 = new Compose.Tool('h1');
 	h1.match = function($xpath){
 		return ($xpath.filter('h1').length) ? true : false;
 	};
@@ -14,7 +14,7 @@
 		}, this));
 	});
 	
-	var h2 = new Compose.Tool();
+	var h2 = new Compose.Tool('h2');
 	h2.match = function($xpath){
 		return ($xpath.filter('h2').length) ? true : false;
 	};
@@ -28,7 +28,7 @@
 		}, this));
 	});
 	
-	var quote = new Compose.Tool();
+	var quote = new Compose.Tool('quote');
 	quote.match = function($xpath){
 		return ($xpath.filter('blockquote').length) ? true : false;
 	};
@@ -42,7 +42,7 @@
 		}, this));
 	});
 	
-	var em = new Compose.Tool();
+	var em = new Compose.Tool('emphasis');
 	em.match = function($xpath){
 		return ($xpath.filter('em').length) ? true : false;
 	};
@@ -58,7 +58,7 @@
 		}, this));
 	});
 	
-	var bold = new Compose.Tool();
+	var bold = new Compose.Tool('strong');
 	bold.match = function($xpath){
 		return ($xpath.filter('strong').length) ? true : false;
 	};
@@ -74,7 +74,7 @@
 		}, this));
 	});
 	
-	var a = new Compose.Tool();
+	var a = new Compose.Tool('a');
 	a.hideInput = function(){
 		this.input.val('').blur().hide();
 	};
@@ -110,7 +110,6 @@
 		.css('position', 'absolute')
 		.hide()
 		.on('keyup', $.proxy(function(event){
-			console.log(event.which);
 			if (event.which === 13){
 				this.reflink.attr('href', this.input.val());
 				this.hideInput();
@@ -124,8 +123,8 @@
 		}, this));
 	});
 
-	var paster = new Compose.Tool();
-	paster.on('init', function(event){
+	var pasteSanitize = new Compose.Tool('PasteSanitize');
+	pasteSanitize.on('init', function(event){
 		this.compose.on('paste', $.proxy(function(event){
 			event.preventDefault();
 			var pasted = event.originalEvent.clipboardData.getData('text/plain');
