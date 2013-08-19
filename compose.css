@@ -18,3 +18,18 @@
 .compose-toolbar .compose-tool.active{
 	color: #3ebf38;
 }
+.compose-toolbar .compose-tool.compose-emphasis{
+	font-style:italic;
+}
+.compose-toolbar .compose-tool.compose-strong{
+	font-weight:bold;
+}
+.compose-toolbar .compose-tool.compose-link{
+	text-decoration:underline;
+}
+.compose-link-box{
+	background: #333;
+	border: 1px solid #212121;
+	color: #eaeaea;
+	padding: 6px 4px;
+}

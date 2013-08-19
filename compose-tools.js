@@ -7,6 +7,7 @@
 	h1.on('init', function(event){
 		this.element = $('<button>')
 		.html('h1')
+		.addClass('compose-h1')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<h1>');
 			else this.compose.unwrapSelection('h1');
@@ -20,6 +21,7 @@
 	h2.on('init', function(event){
 		this.element = $('<button>')
 		.html('h2')
+		.addClass('compose-h2')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<h2>');
 			else this.compose.unwrapSelection('h2');
@@ -33,6 +35,7 @@
 	quote.on('init', function(event){
 		this.element = $('<button>')
 		.html('"')
+		.addClass('compose-quote')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<blockquote>');
 			else this.compose.unwrapSelection('blockquote');
@@ -48,7 +51,7 @@
 		
 		this.element = $('<button>')
 		.html('i')
-		.css('font-style', 'italic')
+		.addClass('compose-emphasis')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<em>');
 			else this.compose.unwrapSelection('em');
@@ -64,7 +67,7 @@
 		
 		this.element = $('<button>')
 		.html('b')
-		.css('font-weight', 'bold')
+		.addClass('compose-strong')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<strong>');
 			else this.compose.unwrapSelection('strong');
@@ -82,8 +85,8 @@
 		this.reflink = null;
 		
 		this.element = $('<button>')
-		.html('a')
-		.css('text-decoration', 'underline')
+		.html('link')
+		.addClass('compose-link')
 		.on('click', $.proxy(function(event){
 			if (!this.match(this.compose.getSelectionXPath())){
 				var $link = this.reflink = $('<a>').attr('href', '#');
@@ -103,6 +106,7 @@
 		
 		this.input = $('<input />')
 		.appendTo($('body'))
+		.addClass('compose-link-box')
 		.css('position', 'absolute')
 		.hide()
 		.on('keyup', $.proxy(function(event){
