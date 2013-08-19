@@ -61,33 +61,33 @@ This dependency might be dropped at some point in the future but this is not a p
 
 ## FAQ
 
-**Can I add more tools to Compose?**
+####### Can I add more tools to Compose?
 
 Compose ships with the most usefull tools — titles, bold, italics, quotes, links and soon images. These should be enough for most use cases. Please note that providing a limited set of tool is again by design — drowning the user with options will not help him.
 
 It is however possible to add custom tools. Compose provides an API for this which is not yet documented. The code for the existing tools can help you for now.
 
-**Can I pick which tool are displayed? Can I reorder them?**
+####### Can I pick which tool are displayed? Can I reorder them?
 
 Compose will include a mechanism to control which tools are shown or not, but this isn't implemented yet. There is no plan to add features like tool ordering or further control over the toolbar at this point. If you need this, please use css.
 
-**Can I change the way the toolbar looks?**
+####### Can I change the way the toolbar looks?
 
 The css file that ships with Compose define how the tools look like. Feel free to re-style them at will. The toolbar and the individual tools have class names so the ycan be targeted. These class names will be documented and configurable.
 
-**I don't want Markdown support**
-**I only want partial Markdown support**
-**What flavor of markdown does Compose use?**
+####### I don't want Markdown support
+####### I only want partial Markdown support
+####### What flavor of markdown does Compose use?
 
 Let's state it upfront: it's a bad idea to turn off markdown completely. If you do so you'll need to provide tools for lists, code and maybe other types of content. The Markdown support also provides typographic suggar (proper quotes and similar things).
 
 That being said, there are a number of things you can do to tweak the behavor of Markdown. First, you can turn it off completely by setting the `markdown` option to false.
 
-Second, Compose uses [marked](https://github.com/chjj/marked/) to convert markdown to html (with Github Flavored Markdown). It's not vry practical right now, but you can tweak it's behavior via the global marked object and via the ComposeMarkdown object. More on this soon.
+Second, Compose uses [marked](https://github.com/chjj/marked/) to convert markdown to html (with Github Flavored Markdown). It's not very practical right now, but you can tweak it's behavior via the global marked object and via the ComposeMarkdown object. More on this soon.
 
-Lastly, you can plug in a custom Makrdown parser. Pass in a function for the `markdown`, it will get called at init time and receive the current compose instance as a parameter. After that, you're on your own.
+Lastly, you can plug in a custom Markdown parser. Pass in a function for the `markdown`, it will get called at init time and receive the current compose instance as a parameter. After that, you're on your own.
 
-**My custom stylesheet doesn't use tag names but classes. Can I still use Compose?**
+####### My custom stylesheet doesn't use tag names but classes. Can I still use Compose?
 
 Sure, but it might cause some issues. By default, both tools and markdown conversion only output regular html tags without attributes.
 
