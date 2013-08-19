@@ -46,8 +46,11 @@ new Compose('#your-container', settings);
 
 The `settings` variable is a plain js object and can configure some stuff. Supported options:
 
-- `markdwon': See the FAQ for more about this option
-- `tools': an array of tools that will be attached to this instance of Compose
+- `markdown': See the FAQ for more about this option.
+- `tools': an array of tools that will be attached to this instance of Compose.
+- `toolbarClass': CSS class for the toolbar. Default is 'compose-toolbar'.
+- `toolClass': CSS class for the tools. Default is 'compose-tool'.
+- `toolClassActive': CSS class for the tools when they have been used on the curently selected portion of text. Default is 'active'.
 
 ## Browser support & dependency
 
