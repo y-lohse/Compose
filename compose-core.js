@@ -25,7 +25,7 @@
 		if (this.markdown) this.markdown = new this.markdown(this);
 		
 		this.$element.on('keydown', $.proxy(this.keydown, this))
-					  .on('keyup', $.proxy(this.keyup, this));
+					 .on('keyup', $.proxy(this.keyup, this));
 		$(document).on('mouseup', $.proxy(this.mouseup, this));
 		
 		//init tools
@@ -218,7 +218,6 @@
 		return false;
 	};
 	
-	
 	//instance prototype
 	Compose.prototype.isSelectionInElement = function(){
 		//@TODO : maybe checking with the common ancestor stuff would be better
@@ -241,6 +240,8 @@
 				this.$toolbar.append(this.tools[tool.name].element);
 			}
 		}
+		
+		return this;
 	}
 	
 	Compose.prototype.removeTool = function(toolName){
@@ -252,6 +253,8 @@
 			this.tools[toolName].dispatchEvent({'type': 'exit'});
 			delete this.tools[toolName];
 		}
+		
+		return this;
 	}
 	
 	Compose.prototype.hideTools = function(){
@@ -261,6 +264,8 @@
 			if (!$.isFunction(this.tools[tool].match) || !this.tools[tool].element) continue;
 			$(this.tools[tool].element).trigger('compose-hide');
 		}
+		
+		return this;
 	};
 	
 	Compose.prototype.showTools = function(){
@@ -307,6 +312,8 @@
 		
 		//actually show tools
 		this.$toolbar.show();
+		
+		return this;
 	};
 	
 	Compose.prototype.mouseup = function(event){
