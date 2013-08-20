@@ -5,11 +5,18 @@
 
 ## A real WYSIWYG editor
 
-Compose has a very different approach than most other content editors. The general idea is that the writer needs to see his content displayed in the exact same way readers will.
+Compose has a very different approach than most other content editors. The general idea is that the writer needs to see his content in the exact same way readers will see it.
 
 This makes Compose a "real" What You See Is What You Get editor — you're not seeing a preview or a simplified version while you're writing, it's the real deal.
 
 The other important aspect is that creators need to focus on their content. Compose helps this by keeping tools out of the way until the writer needs them. Even better, it has built-in [Markdown](http://daringfireball.net/projects/markdown/basics) support so you don't even need the select-and-click tools most of the time.
+
+## Features
+
+- Natural formating. Start lists with hyphens, mark emphasis with * and _, etc.
+- Pasting won't fuck eveything up. Pasted content is sanitized before it's inserted so data from other text editors will be clean.
+- It's simple. Compose provides the most common formating tools out of the box — nothing more, nothing less.
+- Typographic sweetness. Ellipses, proper dashes and quotes all built-in and automaticaly applied.
 
 ## Embedding Compose
 
@@ -73,7 +80,7 @@ This dependency might be dropped at some point in the future but this is not a p
 
 Compose ships with the most usefull tools — titles, bold, italics, quotes, links and soon images. These should be enough for most use cases. Please note that providing a limited set of tool is again by design — drowning the users with options will not help them.
 
-It is however possible to add custom tools and [Compose provides a lightweight for this](https://github.com/y-lohse/Compose/wiki/Tools-API). The [core API](https://github.com/y-lohse/Compose/wiki/Core-API) may come in handy too.
+It is however possible to add custom tools and [Compose provides a lightweight API for this](https://github.com/y-lohse/Compose/wiki/Tools-API). The [core API](https://github.com/y-lohse/Compose/wiki/Core-API) may come in handy too.
 
 ##### Can I pick which tools are displayed? Can I reorder them?
 
@@ -85,9 +92,7 @@ There is no plan to add features like tool ordering or further control over the 
 
 The css file that ships with Compose define how the tools look like. Feel free to re-style them at will. The toolbar and the individual tools have configurable class names so they can be targeted via css.
 
-##### I don't want Markdown support
-##### I only want partial Markdown support
-##### What flavor of markdown does Compose use?
+##### I don't want Markdown support / I only want partial Markdown support / What flavor of markdown does Compose use?
 
 Let's state it upfront: it's a bad idea to turn off markdown completely. If you do so you'll need to provide tools for lists, code and maybe other types of content. The Markdown support also provides typographic suggar (proper quotes and similar things).
 
@@ -102,5 +107,3 @@ Lastly, you can plug in a custom Markdown parser. Pass in a function for the `ma
 Sure, but it might cause some issues. By default, both tools and markdown conversion only output regular html tags without attributes.
 
 For the tools, you can tweak them to add custom class names to element. Compsoe migth provide an API for this in the future. Markdown however does not support attributes so you'll need to disable it, at least partly. Again, a solution for this might be designed in the future.
-
-Another option is to duplicate your stylesheet and replace class names with actual tags. While this isn't great, it would work.
