@@ -101,7 +101,7 @@
 		}, this));
 	});
 	
-	var a = new Compose.Tool('a');
+	var a = new Compose.Tool('link');
 	a.hideInput = function(){
 		this.input.val('').blur().hide();
 	};

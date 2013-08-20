@@ -472,7 +472,7 @@
 	//jquery plugin
 	$.fn.Compose =function(options){
 		return this.each(function(){
-			$(this).data('compose', new Compose(this, options));
+			$(this).data('Compose', new Compose(this, options));
 		});
 	};
 	
