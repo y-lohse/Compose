@@ -37,7 +37,34 @@
 		.html('"')
 		.addClass('compose-quote')
 		.on('click', $.proxy(function(event){
-			if (!this.match(this.compose.getSelectionXPath())) this.compose.wrapSelection('<blockquote>');
+			if (!this.match(this.compose.getSelectionXPath())){
+				var $p = $('<p>');
+				this.compose.wrapSelection($p);
+				$p.wrap('<blockquote>');
+				
+				//unwrap quotes parent paragraph
+				if ($p.parent().parent().is('p')){
+					var $quote = $p.parent(),
+						n,
+						prev = [],
+						next = [];
+					
+					n = $quote[0].previousSibling;
+					while (n){
+						prev.push(n);
+						n = n.previousSibling;
+					};
+					n = $quote[0].nextSibling;
+					while (n){
+						next.push(n);
+						n = n.nextSibling;
+					};
+					
+					$quote.unwrap();
+					$(prev).wrapAll('p');
+					$(next).wrapAll('p');
+				}
+			}
 			else this.compose.unwrapSelection('blockquote');
 		}, this));
 	});
